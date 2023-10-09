@@ -14,7 +14,7 @@ async function initDurableWorker(workflowName = 'helloworld') {
   });
   const worker = await Durable.Worker.create({
     connection,
-    namespace: 'hellworldExample',
+    namespace: `${workflowName}Example`,
     taskQueue: workflowName,
     workflowsPath: require.resolve(`./${workflowName}/workflows`),
     activities,

@@ -1,5 +1,4 @@
-const {Durable} = require('@hotmeshio/hotmesh');
-const activities = require('./activities');
+const { Durable } = require('@hotmeshio/hotmesh');
 
 const { helloworld } = Durable.workflow.proxyActivities();
 
