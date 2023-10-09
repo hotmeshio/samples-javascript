@@ -1,0 +1,26 @@
+version: '3'
+services:
+  sandbox:
+    build: .
+    ports:
+      - "3000:3000"
+    container_name: sandbox
+    environment:
+      - REDIS_HOST=redis6373
+      - REDIS_PORT=6373
+    depends_on:
+      - redis6373
+    volumes:
+      - ./:/app
+
+  redis6373:
+    image: "redis:alpine"
+    ports:
+      - "6373:6373"
+    container_name: redis6373
+    command: ["redis-server", "--port", "6373"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6373", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
