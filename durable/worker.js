@@ -1,8 +1,8 @@
 const { Durable } = require('@hotmeshio/hotmesh');
 const Redis = require('ioredis');
-const activities = require('./helloworld/activities');
+const helloworldExample = require('./helloworld/workflows');
 
-async function initDurableWorker(workflowName = 'helloworld') {
+async function initDurableWorker() {
   const connection = await Durable.NativeConnection.connect({
     class: Redis,
     options: {
@@ -14,13 +14,12 @@ async function initDurableWorker(workflowName = 'helloworld') {
   });
   const worker = await Durable.Worker.create({
     connection,
-    namespace: `${workflowName}Example`,
-    taskQueue: workflowName,
-    workflowsPath: require.resolve(`./${workflowName}/workflows`),
-    activities,
+    namespace: 'helloworldExample',
+    taskQueue: 'helloworld',
+    workflow: helloworldExample,
   });
   await worker.run();
-  console.log('worker running,', require.resolve(`./${workflowName}/workflows`));
+  console.log('worker running,', require.resolve('./helloworld/workflows'));
 }
 
 module.exports = initDurableWorker;
