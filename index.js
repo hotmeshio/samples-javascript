@@ -1,24 +1,23 @@
 const express = require('express');
+
+//1) Import Pluck and Redis
 const { Pluck, MeshOS } = require('@hotmeshio/pluck');
 const Redis = require('ioredis');
 
-
-//startup
 (async function init() {
-  //initialize the pluck instance to connect to the redis server
+  //2) Initialize Pluck with a Redis backend (see docker-compose.yml for the Redis configuration)
   const pluck = new Pluck(Redis, { host: 'redis', port: 6379, password: 'key_admin' });
 
-  //connect the worker (it returns `Welcome, ${first}.`)
+  //3) Connect a worker function (this one returns `Welcome, ${first}.`)
   await pluck.connect('greeting', async (first) => {
     console.log('Could fetch from the database...')
     return `Welcome, ${first}.`;
   });
 
-  //define the http route
   const app = express();
   app.get('/', async (req, res) => {
 
-    //call the 'greeting' function and cache for 3 minutes
+    //4) call/exec a worker function (cache the response for 3 minutes)
     const response = await pluck.exec(
       'greeting',
       [req.query.first],
