@@ -6,21 +6,20 @@ services:
       - "3000:3000"
     container_name: sandbox
     environment:
-      - REDIS_HOST=redis6373
-      - REDIS_PORT=6373
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
-      - redis6373
+      - redis
     volumes:
       - ./:/app
 
-  redis6373:
-    image: "redis:alpine"
+  redis:
+    image: redis/redis-stack:latest
+    command: ["redis-server", "--requirepass", "key_admin", "--loadmodule", "/opt/redis-stack/lib/redisearch.so"]
     ports:
-      - "6373:6373"
-    container_name: redis6373
-    command: ["redis-server", "--port", "6373"]
+      - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6373", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3

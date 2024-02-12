@@ -1,14 +1,31 @@
 const express = require('express');
-const { Durable } = require('@hotmeshio/hotmesh');
-const executeDurableWorkflow = require('./durable/client');
-const initDurableWorker = require('./durable/worker');
+const { Pluck, MeshOS } = require('@hotmeshio/pluck');
+const Redis = require('ioredis');
+
 
 //startup
 (async function init() {
-  await initDurableWorker('helloworld');
+  //initialize the pluck instance to connect to the redis server
+  const pluck = new Pluck(Redis, { host: 'redis', port: 6379, password: 'key_admin' });
+
+  //connect the worker (it returns `Welcome, ${first}.`)
+  await pluck.connect('greeting', async (first) => {
+    console.log('Could fetch from the database...')
+    return `Welcome, ${first}.`;
+  });
+
+  //define the http route
   const app = express();
   app.get('/', async (req, res) => {
-    const response = await executeDurableWorkflow('helloworld');
+
+    //call the 'greeting' function and cache for 3 minutes
+    const response = await pluck.exec(
+      'greeting',
+      [req.query.first],
+      { ttl: '3 minutes', id: req.query.first },
+    );
+
+    //return the response
     return res.send(response);
   });
   const PORT = 3000;
@@ -20,8 +37,7 @@ const initDurableWorker = require('./durable/worker');
 //shutdown
 async function shutdown(signal) {
   console.log(`Received ${signal}. Shutting down...`);
-  await Durable.Worker.shutdown();
-  await Durable.Client.shutdown();
+  await MeshOS.stopWorkers();
   process.exit(0);
 }
 process.on('SIGINT', async () => {
