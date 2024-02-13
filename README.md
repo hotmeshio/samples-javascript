@@ -9,10 +9,10 @@ docker-compose up --build -d
 ```
 
 ## Run/Test
-Test from any HTTP client (or browser).
+Once built, test from any HTTP client (or browser).
 
 ```
 http://localhost:3000/?first=John
 ```
 
->Send different values for `first` to seed entries in the Redis database. Each call will seed a new entry which will disappear after 3 minutes, showing how to use Redis as an operation data cache.
+>Send different values for `first` to seed entries in the Redis database. Each call will seed a new entry which will disappear after 3 minutes, showing how to use Redis as an operational data cache. The example also demonstrates how to include custom, searchable data, accessible via the FT.SEARCH command.
