@@ -1,14 +1,25 @@
 //USAGE            `node test.js John Jane Jim`        ///////
 
-//1) Import Pluck and Redis
+//0) Import Pluck and Redis
 const { Pluck } = require('@hotmeshio/pluck');
 const Redis = require('ioredis');
 
 (async () => {
   const userIDs = process.argv.slice(2);
 
+  //1) Define a search schema
+  const schema = {
+    schema: {
+      plan: { type: 'TAG', sortable: true },
+      country: { type: 'TAG', sortable: true },
+      active: { type: 'TEXT', sortable: false },
+    },
+    index: 'greeting',    //the index ID is 'greeting'
+    prefix: ['greeting'], //index documents that begin with 'greeting'
+  };
 
-  //2) Initialize Pluck and Redis (include a search schema)
+
+  //2) Initialize Pluck and Redis
   const pluck = new Pluck(
     Redis,
     {
@@ -17,23 +28,17 @@ const Redis = require('ioredis');
       password: 'key_admin'
     },
     null,
-    //schema for searching
-    {
-      schema: {
-        plan: { type: 'TAG', sortable: true },
-        country: { type: 'TAG', sortable: true },
-        active: { type: 'TEXT', sortable: false },
-      },
-      index: 'greeting',    //the index ID is 'greeting'
-      prefix: ['greeting'], //index documents that begin with 'greeting'
-    }
+    schema
   );
 
 
 
   //3) Connect the 'greeting' worker function
-  await pluck.connect('greeting', async (userID) => {
-    return `Welcome, ${userID}.`;
+  await pluck.connect({
+    entity: 'greeting',
+    target: async function(userID) {
+      return `Welcome, ${userID}.`;
+    }
   });
 
 
@@ -44,10 +49,10 @@ const Redis = require('ioredis');
   
 
     //4) Call the 'greeting' worker function; include search data
-    const response = await pluck.exec(
-      'greeting',
-      [userID],
-      {
+    const response = await pluck.exec({
+      entity: 'greeting',
+      args: [userID],
+      options: {
         //cache for 3 minutes
         ttl: '3 minutes',
         id: userID,
@@ -55,7 +60,7 @@ const Redis = require('ioredis');
           data: { plan: 'pro', country: 'ca', active: 'true' }
         }
       },
-    );
+    });
 
 
 
@@ -71,15 +76,6 @@ const Redis = require('ioredis');
 
 
   //6) Create a search index
-  const schema = {
-    schema: {
-      plan: { type: 'TAG', sortable: true },
-      country: { type: 'TAG', sortable: true },
-      active: { type: 'TEXT', sortable: false },
-    },
-    index: 'greeting',    //the index ID is 'greeting'
-    prefix: ['greeting'], //index documents that begin with 'greeting'
-  };
   await pluck.createSearchIndex('greeting', {}, schema);
 
 
