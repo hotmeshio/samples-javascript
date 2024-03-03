@@ -9,10 +9,10 @@ docker-compose up --build -d
 ```
 
 ## Run/Test
-Once built, execute the following command from within the running docker container:
+Once built, execute the following command from within the running docker container (pass in any number of names as arguments):
 
 ```bash
-node test.js Jon Jay Joe
+npm test Jon Jay Joe
 ```
 
 >A user 'greeting' record will be added to Redis and cached for each name provided. The cache will be used for subsequent requests (for 3 minutes). All data is full-text-searchable via the RediSearch module.
