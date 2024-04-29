@@ -1,16 +1,16 @@
 {
   "name": "sandy",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Pluck LifeCycle Sandbox",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test node test.js"
+    "test": "HMSH_BLOCK_TIME_MS=500 NODE_ENV=test node test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hotmeshio/pluck": "^0.0.20",
+    "@hotmeshio/pluck": "^0.0.29",
     "ioredis": "^5.3.2",
     "redis": "^4.6.10"
   }
