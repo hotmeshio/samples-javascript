@@ -1,17 +1,17 @@
 {
-  "name": "sandy",
-  "version": "0.0.1",
-  "description": "Pluck LifeCycle Sandbox",
-  "main": "index.js",
+  "name": "samples-javascript",
+  "version": "0.1.3",
+  "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
-    "test": "HMSH_BLOCK_TIME_MS=500 NODE_ENV=test node test.js"
+    "test:durable": "HMSH_BLOCK_TIME_MS=15 NODE_ENV=test node test/durable.js",
+    "test:pluck": "HMSH_BLOCK_TIME_MS=15 NODE_ENV=test node test/pluck.js",
+    "test:hotmesh": "HMSH_BLOCK_TIME_MS=15 NODE_ENV=test node test/hotmesh.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hotmeshio/pluck": "^0.0.29",
-    "ioredis": "^5.3.2",
+    "@hotmeshio/pluck": "^0.1.3",
     "redis": "^4.6.10"
   }
 }

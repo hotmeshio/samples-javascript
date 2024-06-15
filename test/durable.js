@@ -1,9 +1,9 @@
-//USAGE            `npm test John Jane Jim`        ///////
+//USAGE            `npm test cat dog mouse`        ///////
 
 //0) Import Pluck and Redis
 console.log('IMPORTING REDIS/PLUCK ...');
 const { Pluck } = require('@hotmeshio/pluck');
-const Redis = require('ioredis');
+const Redis = require('redis');
 
 (async () => {
   const userIDs = process.argv.slice(2);
@@ -25,11 +25,12 @@ const Redis = require('ioredis');
   const pluck = new Pluck(
     Redis,
     {
-      host: 'redis',
-      port: 6379,
+      socket: {
+        host: 'redis',
+        port: 6379,
+      },
       password: 'key_admin'
     },
-    null,
     schema
   );
 
