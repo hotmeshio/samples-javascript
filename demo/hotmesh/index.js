@@ -1,43 +1,31 @@
-//USAGE            `npm test cat dog mouse`        ///////
+//USAGE            `npm demo:hotmesh howdy`        ///////
 
-//0) Import Pluck and Redis
-console.log('IMPORTING REDIS/HOTMESH ...');
+//0) Import HotMesh and Redis
+console.log('initializing hotmesh demo ...\n');
+
 const { HotMesh } = require('@hotmeshio/pluck');
 const Redis = require('redis');
+const redisConfig = {
+  class: Redis,
+  options: {
+    url: 'redis://:key_admin@redis:6379'
+  }
+};
 
 (async () => {
-  //init the engine and worker
+
+  //init an engine and worker
   const hotMesh = await HotMesh.init({
     appId: 'abc',
     engine: {
-      redis: {
-        class: Redis,
-        options: {
-          socket: {
-            host: 'redis',
-            port: 6379,
-          },
-          password: 'key_admin'
-        }
-      }
+      redis: redisConfig,
     },
 
     workers: [
       { 
         topic: 'work.do',
-        redis: {
-          class: Redis,
-          options: {
-            socket: {
-              host: 'redis',
-              port: 6379,
-            },
-            password: 'key_admin'
-          }
-        },
-
-        //linked function (will echo hello world)
-        callback: async (data) => {
+        redis: redisConfig,
+        callback: async function (data) {
           return {
             metadata: { ...data.metadata },
             data: { y: `${data?.data?.x} world` }
@@ -47,6 +35,7 @@ const Redis = require('redis');
     ]
   });
 
+  //3) compile and deploy the app to Redis (the distributed executable)
   await hotMesh.deploy(`app:
   id: abc
   version: '1'
@@ -94,11 +83,19 @@ const Redis = require('redis');
         t1:
           - to: a1`);
 
+  //4) re/activate the app across the quorum (happens simultaneously network wide)
   await hotMesh.activate('1');
-  const response5 = await hotMesh.pubsub('abc.test', { a : 'hello' });
-  console.log(response5.data.b); // hello world
 
-  //8) Shutdown Pluck
+  //5) run a test
+  const [greeting, ..._rest] = process.argv.slice(2);
+  const response = await hotMesh.pubsub('abc.test', { a : greeting ?? 'hello' });
+  console.log('\nRESPONSE', response.data.b, '\n');
+  // returns: `hello world` (or echoes custom greeting)
+
+  //6) Shutdown HotMesh
   hotMesh.stop();
   await HotMesh.stop();
+
+  // Exit the process
+  process.exit(0);
 })();

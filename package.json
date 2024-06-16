@@ -3,13 +3,19 @@
   "version": "0.1.3",
   "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
-    "test:durable": "HMSH_BLOCK_TIME_MS=15 NODE_ENV=test node test/durable.js",
-    "test:pluck": "HMSH_BLOCK_TIME_MS=15 NODE_ENV=test node test/pluck.js",
-    "test:hotmesh": "HMSH_BLOCK_TIME_MS=15 NODE_ENV=test node test/hotmesh.js"
+    "demo:hotmesh": "HMSH_LOG_LEVEL=debug  HMSH_BLOCK_TIME_MS=5 node demo/hotmesh/index.js",
+    "demo:durable": "HMSH_BLOCK_TIME_MS=5 node demo/durable/index.js",
+    "demo:pluck": "HMSH_BLOCK_TIME_MS=5 node demo/pluck/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "Redis",
+    "HotMesh",
+    "Temporalio",
+    "Durable Workflow",
+    "Distributed Orhestration"
+  ],
+  "author": "luke.birdeau@gmail.com",
+  "license": "Apache-2.0",
   "dependencies": {
     "@hotmeshio/pluck": "^0.1.3",
     "redis": "^4.6.10"
