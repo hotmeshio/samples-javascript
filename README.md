@@ -207,7 +207,7 @@ async function run() {
 
 ## Pluck
 ### Hybrid Transactional Analytical Processing (HTAP)
-For those deployments with the Redis `FT.SEARCH` module enabled, it's possible to deploy [HTAP](https://en.wikipedia.org/wiki/Hybrid_transactional/analytical_processing) solutions using the Pluck, enabling millisecond-level *transactional processing* with *real-time analytics*. Even without `FT.SEARCH` enabled, Pluck's easy-to-use, functional style makes it an excellent starting point for both new development and refactoring. Key features include:
+For those deployments with the Redis `FT.SEARCH` module enabled, it's possible to deploy [HTAP](https://en.wikipedia.org/wiki/Hybrid_transactional/analytical_processing) solutions using Pluck, enabling millisecond-level *transactional processing* with *real-time analytics*. Even without `FT.SEARCH` enabled, Pluck's easy-to-use, functional style makes it an excellent starting point for both new development and refactoring. Key features include:
 
 - `Easy Integration`: Seamlessly integrates into existing code bases, allowing for the refactoring of legacy systems without extensive overhaul.
 - `Ad Hoc Network Creation`: Facilitates the creation of an operational data layer by connecting functions into a single, manageable mesh.
