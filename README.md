@@ -33,7 +33,11 @@ The following depicts the mechanics of the approach, and describes what is essen
 
 <img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
->Process orchestration is emergent within HotMesh and occurs naturally as a result of routing messages. While the reference implementation targets Redis+TypeScript, any multimodal database (ValKey, DragonFly, etc) can be leveraged to deliver serverless workflows.
+The design system is based upon a canonical set of 9 principle message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+
+<img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
+
+>Process orchestration is emergent within HotMesh and occurs naturally as a result of routing messages. While the reference implementation targets Redis+TypeScript, any multimodal database (ValKey, DragonFly, etc) can be leveraged.
 
 ### Control Without a Controller
 HotMesh is designed as a distributed quorum of engines where each member adheres to the principles of CQRS. According to CQRS, *consumers* are instructed to read events from assigned topic queues while *producers* write to said queues. This division of labor is essential to the smooth running of the system. HotMesh leverages this principle to drive the perpetual behavior of engines and workers (along with other advantages described [here](https://github.com/hotmeshio/sdk-typescript/blob/main/docs/distributed_orchestration.md)). 
@@ -104,18 +108,95 @@ const response = await hotMesh.pubsub('myfirstapp.test', {});
 
 ## Durable
 
-### High-speed, Serverless Temporal Clone
-HotMesh's *Durable* module (included alongside HotMesh in the same NPM package) is modeled after TemporalIO's developer-friendly SDK. It is included to help developers get the benefits of HotMesh without learning the YAML syntax. If you're familiar with Temporal's TypeScript SDK, the principles are exactly the same. But because it's backed by an in-memory data store (Redis), its millisecond-level performance might be better suited for those transactions requiring millisecond execution times.
+### High-speed, Serverless Temporal
+HotMesh's *Durable* module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly platform. It is included to help developers get the benefits of HotMesh without learning the YAML syntax. If you're familiar with Temporal's TypeScript SDK, the principles are exactly the same. But because it's backed by an in-memory data store (Redis), its millisecond-level performance might be better suited for those transactions requiring millisecond execution times.
 
-The [HotMesh Durable module](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server. HotMesh's Kafka-like approach to event streams enables it to mimic the behavior of traditional application servers but without requiring the physical server. Passing messages is sufficient to produce the same outcomes without additional infrastructure, borrowing CPU from the distributed containers messages are sent.
-
-This [single YAML file](https://github.com/hotmeshio/sdk-typescript/blob/main/services/durable/schemas/factory.ts) is HotMesh's Kafka-like description of Temporal's application server. The YAML can be difficult to read, so the following is a visual depiction of its various activities and transitions. Developers familiar with Temporal will easily make sense of various activities like reentry, collation, composition, throttling, etc. Even though this file is < 100KB, it produces behavioral fidelity indistinguishable from Temporal.
+The [HotMesh Durable Module](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server. The [Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/durable/schemas/factory.ts) is authored in YAML and describes Temporal's application server as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like reentry, collation, composition, throttling, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal.
 
 <img src="./img/temporal_state_machine.png" alt="Temporal reentrant workflow execution as a finite state machine" style="max-width:100%;width:800px;">
 
->HotMesh's mimicry of Temporal's server is nothing more than a finite state instruction set. And the principles can be applied to mimic any other system including integration platforms like MuleSoft.
+The standard set of expected static methods is available, including: 
 
-For those familiar with Temporal, the included example targets the standard top-level constructs: `activities`, `workflows`, `workers` and `clients`. 
+ - `waitFor` Pause your function using your chosen signal key, and only awaken when the signal is received from the outide. Use a standard `Promise` to collate and cache the signals and only awaken your function once all signals have arrived.
+    ```javascript
+    import { Durable } from '@hotmeshio/hotmesh';
+
+    const { waitFor } = Durable.workflow;
+    const [a, b] = await Promise.all([
+      waitFor<{payload: string}>('sig1'),
+      waitFor<number>('sig2')
+    ]);
+    ```
+ - `signal` Send a signal (and payload) to a paused function awaiting the signal. Signals may also be sent from the outside to awaken a paused function.
+    ```javascript
+    await Durable.workflow.signal('sig1', {payload: 'hi!'});
+    ```
+ - `hook` Redis governance converts your functions into 're-entrant processes'. Optionally use the *hook* method to spawn parallel execution threads to augment a running workflow.
+    ```javascript
+    await Durable.workflow.hook({
+      workflowName: 'newsletter',
+      taskQueue: 'default',
+      args: []
+    });
+    ```
+ - `sleepFor` Pause function execution for a ridiculous amount of time (months, years, etc). There's no risk of information loss, as Redis governs function state. When your function awakens, function state is efficiently (and automatically) restored and your function will resume right where it left off.
+    ```javascript
+    await Durable.workflow.sleepFor('1 month');
+    ```
+ - `random` Generate a deterministic random number that can be used in a reentrant process workflow (replaces `Math.random()`).
+    ```javascript
+    const random = await Durable.workflow.random();
+    ```
+ - `execChild` Call another durable function and await the response. *Design sophisticated, multi-process solutions by leveraging this command.*
+    ```javascript
+    const jobResponse = await Durable.workflow.execChild({
+      workflowName: 'newsletter',
+      taskQueue: 'default',
+      args: [{ id, user_id, etc }],
+    });
+    ```
+ - `startChild` Call another durable function, but do not await the response.
+    ```javascript
+    const jobId = await Durable.workflow.startChild({
+      workflowName: 'newsletter',
+      taskQueue: 'default',
+      args: [{ id, user_id, etc }],
+    });
+    ```
+ - `getContext` Get the current workflow context (workflowId, replay history, replay index, etc).
+    ```javascript
+    const context = await Durable.workflow.getContext();
+    ```
+ - `search` Instance a search session
+    ```javascript
+    const search = await Durable.workflow.search();
+    ```
+    - `set` Set one or more name/value pairs
+      ```javascript
+      await search.set('name1', 'value1', 'name2', 'value2');
+      ```
+    - `get` Get a single value by name
+      ```javascript
+      const value = await search.get('name');
+      ```
+    - `mget` Get multiple values by name
+      ```javascript
+      const [val1, val2] = await search.mget('name1', 'name2');
+      ```
+    - `del` Delete one or more entries by name and return the number deleted
+      ```javascript
+      const count = await search.del('name1', 'name2');
+      ```
+    - `incr` Increment (or decrement) a number
+      ```javascript
+      const value = await search.incr('name', 12);
+      ```
+    - `mult` Multiply a number
+      ```javascript
+      const value = await search.mult('name', 12);
+      ```
+
+Developers already familiar with Temporal will recognize the standard top-level constructs used in the example: `activities`, `workflows`, `workers` and `clients`. Specifically, the example proxies two activities, one of which will throw random errors. But the workflow eventually succeeds as it is a durable, reentrant workflow.
 
 ### Activities
 Start by defining **activities**. They can be written in any style, using any framework, and can even be legacy functions you've already written. *Note how the `saludar` example throws an error 50% of the time. It doesn't matter how unpredictable your functions are, HotMesh will retry as necessary until they succeed.*
@@ -160,13 +241,13 @@ Instance a HotMesh **client** to invoke the workflow.
 ```javascript
 //client.ts
 import { Durable, HotMesh } from '@hotmeshio/hotmesh';
-import Redis from 'ioredis'; //OR `import * as Redis from 'redis';`
+import * as Redis from 'redis';
 
 async function run(): Promise<string> {
   const client = new Durable.Client({
     connection: {
       class: Redis,
-      options: { host: 'localhost', port: 6379 }
+      options: { url: 'redis://:key_admin@localhost:6379' }
     }
   });
 
@@ -188,14 +269,14 @@ Create a **worker** and link your workflow function. Workers listen for tasks on
 ```javascript
 //worker.ts
 import { Durable } from '@hotmeshio/hotmesh';
-import Redis from 'ioredis';
+import * as Redis from 'redis';
 import * as workflows from './workflows';
 
 async function run() {
   const worker = await Durable.Worker.create({
     connection: {
       class: Redis,
-      options: { host: 'localhost', port: 6379 },
+      options: { url: 'redis://:key_admin@localhost:6379' },
     },
     taskQueue: 'default',
     workflow: workflows.example,
