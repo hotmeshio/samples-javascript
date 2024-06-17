@@ -15,7 +15,7 @@ This repo demonstrates the use of HotMesh, Durable, and Pluck in a JavaScript en
 3. [Pluck](#pluck)
    - [Hybrid Transactional Analytical Processing (HTAP)](#hybrid-transactional-analytical-processing-htap)
    - [Ad hoc Operational Networks](#ad-hoc-operational-networks)
-   - [Connect Your Functions](#connect-your-functions)
+   - [Connect](#connect)
    - [Execute](#execute)
    - [Execute and Cache](#execute-and-cache)
    - [Execute and Operationalize](#execute-and-operationalize)
@@ -306,7 +306,7 @@ Pluck creates an *ad hoc*, Redis-backed network of functions (an "operational da
 
 *Any service with access to Redis can join in the network, bypassing the legacy clutter.*
 
-### Connect Your Functions
+### Connect
 Easily expose your target functions. Here the legacy `getUser` function is registered as `user`.
 
 ```javascript
