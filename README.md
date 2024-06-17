@@ -1,7 +1,5 @@
 # samples-javascript
-This repo demonstrates the use of HotMesh in a JavaScript environment, providing examples for caching, executing, indexing, and searching transactional workflows.
-
-The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
+This repo demonstrates the use of HotMesh in a JavaScript environment.The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
 
 If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
 
@@ -31,18 +29,14 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 ## Quickstart
 
 ### Requirements
-
 - Docker (Desktop 4.24/Docker Compose 2.22.0)
 - Node
 
 ### Get started
-
-1. Build the environment `npm run docker:up`
-2. Open RedisInsight `npm run open:redis`, providing `username=default` and `password=key_admin`
-
-### Docker Setup
-- `npm run docker:reset-redis` - Reset the Redis database
-- `npm run docker:logs:redis` - View logs for Redis
+- `npm run docker:up` - Build
+- `npm run open:redis` - Open RedisInsight [password is `key_admin`]
+- `npm run docker:reset-redis` - Reset Redis
+- `npm run docker:logs:redis` - View Redis logs
 
 ### Run the Demos
 - `npm run docker:demo:hotmesh howdy` - Run the HotMesh lifecycle example
@@ -50,7 +44,6 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 - `npm run docker:demo:pluck cat dog mouse` - Run the Pluck lifecycle example
 
 ## HotMesh
-
 ### Distributed Orchestration
 *HotMesh* is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
 
