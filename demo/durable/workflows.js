@@ -5,7 +5,8 @@ const { greet, saludar } = Durable.workflow.proxyActivities({
   activities,
   retryPolicy: {
     maximumAttempts: 1000, //I hope not!
-    maximumInterval: '1 second',
+    maximumInterval: '5 seconds',
+    backoffCoefficient: 2,
   }
 });
 

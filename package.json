@@ -3,16 +3,29 @@
   "version": "0.1.3",
   "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
-    "demo:hotmesh": "HMSH_LOG_LEVEL=debug  HMSH_BLOCK_TIME_MS=5 node demo/hotmesh/index.js",
-    "demo:durable": "HMSH_BLOCK_TIME_MS=5 node demo/durable/index.js",
-    "demo:pluck": "HMSH_BLOCK_TIME_MS=5 node demo/pluck/index.js"
+    "demo:hotmesh": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demo/hotmesh/index.js",
+    "demo:durable": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 node demo/durable/index.js",
+    "demo:pluck": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demo/pluck/index.js",
+    "open:redis": "open http://localhost:8001",
+    "docker:up": "npm run _copy_env_example; npm run _docker:build:up",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:logs:sandbox": "docker compose logs -f sandbox",
+    "docker:logs:redis": "docker compose logs -f redis",
+    "docker:reset-redis": "docker compose down -v && npm run docker:up",
+    "docker:demo:hotmesh": "docker compose exec sandbox npm run demo:hotmesh",
+    "docker:demo:durable": "docker compose exec sandbox npm run demo:durable",
+    "docker:demo:pluck": "docker compose exec sandbox npm run demo:pluck",
+    "_docker:build:up": "docker compose watch",
+    "_copy_env_example": "cp -n env.example .env"
   },
   "keywords": [
     "Redis",
     "HotMesh",
     "Temporalio",
     "Durable Workflow",
-    "Distributed Orhestration"
+    "Distributed Orchestration",
+    "Pluck"
   ],
   "author": "luke.birdeau@gmail.com",
   "license": "Apache-2.0",

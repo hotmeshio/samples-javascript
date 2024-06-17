@@ -16,7 +16,7 @@ const redisConfig = {
 
   //init an engine and worker
   const hotMesh = await HotMesh.init({
-    appId: 'abc',
+    appId: 'hotmesh',
     engine: {
       redis: redisConfig,
     },
@@ -37,10 +37,10 @@ const redisConfig = {
 
   //3) compile and deploy the app to Redis (the distributed executable)
   await hotMesh.deploy(`app:
-  id: abc
+  id: hotmesh
   version: '1'
   graphs:
-    - subscribes: abc.test
+    - subscribes: hotmesh.test
 
       input:
         schema:
@@ -88,7 +88,7 @@ const redisConfig = {
 
   //5) run a test
   const [greeting, ..._rest] = process.argv.slice(2);
-  const response = await hotMesh.pubsub('abc.test', { a : greeting ?? 'hello' });
+  const response = await hotMesh.pubsub('hotmesh.test', { a : greeting ?? 'hello' });
   console.log('\nRESPONSE', response.data.b, '\n');
   // returns: `hello world` (or echoes custom greeting)
 

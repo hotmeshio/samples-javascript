@@ -1,5 +1,5 @@
 # samples-javascript
-This repo demonstrates the use of HotMesh, Durable, and Pluck in a JavaScript environment, providing examples for caching, executing, indexing, and searching transactional workflows.
+This repo demonstrates the use of HotMesh in a JavaScript environment, providing examples for caching, executing, indexing, and searching transactional workflows. HotMesh includes several modules, one or more of which might be relevant to your particular use case. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to the Temporal TypeScript SDK modules and types. If you're interested in HTAP solutions, refer to Pluck. And if you'd like to know more about HotMesh in general, refer to the section on Distributed Orchestration.
 
 ## Table of Contents
 1. [HotMesh](#hotmesh)
@@ -24,6 +24,27 @@ This repo demonstrates the use of HotMesh, Durable, and Pluck in a JavaScript en
 6. [Run/Demo Durable](#rundemo-durable)
 7. [Run/Demo Pluck](#rundemo-pluck)
 
+## Quickstart
+
+### Requirements
+
+- Docker
+- Node
+
+### Get started
+
+1. Build the environment `npm run docker:up`
+2. Open RedisInsight `npm run open:redis`, providing `username=default` and `password=key_admin`
+
+### Docker Setup
+- `npm run docker:reset-redis` - Reset the Redis database
+- `npm run docker:logs:redis` - View logs for Redis
+
+### Run the Demos
+- `npm run docker:demo:hotmesh howdy` - Run the HotMesh lifecycle example
+- `npm run docker:demo:durable` - Run the Durale lifecycle example
+- `npm run docker:demo:pluck cat dog mouse` - Run the Pluck lifecycle example
+
 ## HotMesh
 
 ### Distributed Orchestration
@@ -36,6 +57,11 @@ The following depicts the mechanics of the approach, and describes what is essen
 The design system is based on a canonical set of 9 principal message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
 
 <img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
+
+Here, for example, is the `worker` activity type. It's reentrant (most activities are), which allows your linked functions to emit in-process messages as they complete a task. The messaging system goes beyond basic request/response and fan-out/fan-in patterns, providing real-time progress updates.
+
+<img src="./img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
+
 
 >Process orchestration is emergent within HotMesh and occurs naturally as a result of routing messages. While the reference implementation targets Redis+TypeScript, any multimodal database (ValKey, DragonFly, etc) can be leveraged.
 
@@ -297,7 +323,7 @@ For those deployments with the Redis `FT.SEARCH` module enabled, it's possible t
 - `Workflow Extensions`: Offers a suite of workflow extension methods including hooks for extending functionality, signal handling for inter-process communication, and sleep for delaying execution.
 - `Search and Indexing`: Provides tools for managing workflow state and leveraging Redis' search capabilities to query operational data.
 
-### Ad hoc Operational Networks
+### Ad Hoc Operational Networks
 The following is a typical microservices network, with a tangled mess of services and functions. There's important business logic in there (functions *A*, *B* and *C* are critical), but it's hard to find and access.
 
 <img src="./img/operational_data_layer.png" alt="A Tangled Microservices Network with 3 valuable functions buried within" style="max-width:100%;width:600px;">

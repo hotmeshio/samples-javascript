@@ -8,16 +8,24 @@ const workflows = require('./workflows');
 
 (async () => {
   try {
-    //1) initialize the worker; this is typically done in
-    //   another file, but is done here for convenience
+    //1) Initialize the worker; this is typically done in
+    //   another file, but is done here for convenience.
+    //   The worker will stay open, listening to its
+    //   task queue until Durable.shutdown is called.
     await Durable.Worker.create({
       connection: {
         class: Redis,
         options: { url: 'redis://:key_admin@redis:6379' }
       },
       taskQueue: 'default',
-      namespace: 'temporal',
+      namespace: 'durable',
       workflow: workflows.example,
+      options: {
+        backoffCoefficient: 2,
+        maximumAttempts: 1_000,
+        maximumInterval: '5 seconds'
+      }
+      
     });
 
     //2) initialize the client; this is typically done in
@@ -35,7 +43,7 @@ const workflows = require('./workflows');
       taskQueue: 'default',
       workflowName: 'example',
       workflowId: HotMesh.guid(),
-      namespace: 'temporal',
+      namespace: 'durable', //the app name in Redis
     });
 
     //4) subscribe to the eventual result; if a random
