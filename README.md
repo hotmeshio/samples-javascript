@@ -1,5 +1,9 @@
 # samples-javascript
-This repo demonstrates the use of HotMesh in a JavaScript environment, providing examples for caching, executing, indexing, and searching transactional workflows. HotMesh includes several modules, one or more of which might be relevant to your particular use case. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to the Temporal TypeScript SDK modules and types. If you're interested in HTAP solutions, refer to Pluck. And if you'd like to know more about HotMesh in general, refer to the section on Distributed Orchestration.
+This repo demonstrates the use of HotMesh in a JavaScript environment, providing examples for caching, executing, indexing, and searching transactional workflows.
+
+The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
+
+If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
 
 ## Table of Contents
 1. [HotMesh](#hotmesh)
@@ -28,7 +32,7 @@ This repo demonstrates the use of HotMesh in a JavaScript environment, providing
 
 ### Requirements
 
-- Docker
+- Docker (Desktop 4.24/Docker Compose 2.22.0)
 - Node
 
 ### Get started
@@ -48,9 +52,9 @@ This repo demonstrates the use of HotMesh in a JavaScript environment, providing
 ## HotMesh
 
 ### Distributed Orchestration
-*HotMesh* is a distributed modeling and orchestration system capable of encapsulating existing systems like Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
+*HotMesh* is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
 
-The following depicts the mechanics of the approach, and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
+The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
 
 <img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
@@ -146,8 +150,8 @@ The standard set of expected static methods is available, including:
  - `waitFor` Pause your function using your chosen signal key, and only awaken when the signal is received from the outide. Use a standard `Promise` to collate and cache the signals and only awaken your function once all signals have arrived.
     ```javascript
     import { Durable } from '@hotmeshio/hotmesh';
-
     const { waitFor } = Durable.workflow;
+
     const [a, b] = await Promise.all([
       waitFor<{payload: string}>('sig1'),
       waitFor<number>('sig2')
