@@ -33,7 +33,7 @@ The following depicts the mechanics of the approach, and describes what is essen
 
 <img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
-The design system is based upon a canonical set of 9 principle message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+The design system is based on a canonical set of 9 principal message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
 
 <img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
 
