@@ -403,6 +403,7 @@ const response = await pluck.exec({
 ```
 
 Refer to the [SDK/Docs](https://hotmeshio.github.io/pluck-typescript/index.html) for a full overview of Pluck's features.
+
 ## Build
 The application includes a docker-compose file that spins up one Redis instance and one Node instance. To build the application, run the following command:
 
@@ -418,33 +419,33 @@ docker-compose up --build -d
 This demo deploys a custom YAML model and a linked worker function to demonstrate the full end-to-end lifecycle.
 From within the container:
 ```bash
-npm run docker:demo:js:hotmesh greetings
+npm run demo:js:hotmesh greetings
 ```
 From outside the container:
 ```bash
-npm run demo:js:hotmesh greetings
+npm run docker:demo:js:hotmesh greetings
 ```
 
 #### Run/Demo Durable (JavaScript)
 This demo shows a basic durable workflow with support for *retry*. It throws errors 50% of the time and eventually recovers, logging the result of the workflow execution to the log. The retry cycle is set at 5 seconds.
 From within the container:
 ```bash
-npm run docker:demo:js:durable
+npm run demo:js:durable
 ```
 From outside the container:
 ```bash
-npm run demo:js:durable
+npm run docker:demo:js:durable
 ```
 
 #### Run/Demo Pluck (JavaScript)
 This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
 From within the container:
 ```bash
-npm run docker:demo:js:pluck cat dog mouse
+npm run demo:js:pluck cat dog mouse
 ```
 From outside the container:
 ```bash
-npm run demo:js:pluck cat dog mouse
+npm run docker:demo:js:pluck cat dog mouse
 ```
 
 ### TypeScript Examples
@@ -453,31 +454,31 @@ npm run demo:js:pluck cat dog mouse
 This demo deploys a custom YAML model and a linked worker function to demonstrate the full end-to-end lifecycle.
 From within the container:
 ```bash
-npm run docker:demo:ts:hotmesh greetings
+npm run demo:ts:hotmesh greetings
 ```
 From outside the container:
 ```bash
-npm run demo:ts:hotmesh greetings
+npm run docker:demo:ts:hotmesh greetings
 ```
 
 #### Run/Demo Durable (TypeScript)
 This demo shows a basic durable workflow with support for *retry*. It throws errors 50% of the time and eventually recovers, logging the result of the workflow execution to the log. The retry cycle is set at 5 seconds.
 From within the container:
 ```bash
-npm run docker:demo:ts:durable
+npm run demo:ts:durable
 ```
 From outside the container:
 ```bash
-npm run demo:ts:durable
+npm run docker:demo:ts:durable
 ```
 
 #### Run/Demo Pluck (TypeScript)
 This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
 From within the container:
 ```bash
-npm run docker:demo:ts:pluck cat dog mouse
+npm run demo:ts:pluck cat dog mouse
 ```
 From outside the container:
 ```bash
-npm run demo:ts:pluck cat dog mouse
+npm run docker:demo:ts:pluck cat dog mouse
 ```
