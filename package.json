@@ -3,9 +3,12 @@
   "version": "0.1.3",
   "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
-    "demo:hotmesh": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demo/hotmesh/index.js",
-    "demo:durable": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 node demo/durable/index.js",
-    "demo:pluck": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demo/pluck/index.js",
+    "demo:js:hotmesh": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demos/js/hotmesh/index.js",
+    "demo:js:durable": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 node demos/js/durable/index.js",
+    "demo:js:pluck": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demos/js/pluck/index.js",
+    "demo:ts:hotmesh": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 ts-node demos/ts/hotmesh/index.ts",
+    "demo:ts:durable": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 ts-node demos/ts/durable/index.ts",
+    "demo:ts:pluck": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 ts-node demos/ts/pluck/index.ts",
     "open:redis": "open http://localhost:8001",
     "docker:up": "npm run _copy_env_example; npm run _docker:build:up",
     "docker:down": "docker compose down",
@@ -13,9 +16,12 @@
     "docker:logs:sandbox": "docker compose logs -f sandbox",
     "docker:logs:redis": "docker compose logs -f redis",
     "docker:reset-redis": "docker compose down -v && npm run docker:up",
-    "docker:demo:hotmesh": "docker compose exec sandbox npm run demo:hotmesh",
-    "docker:demo:durable": "docker compose exec sandbox npm run demo:durable",
-    "docker:demo:pluck": "docker compose exec sandbox npm run demo:pluck",
+    "docker:demo:js:hotmesh": "docker compose exec sandbox npm run demo:js:hotmesh",
+    "docker:demo:js:durable": "docker compose exec sandbox npm run demo:js:durable",
+    "docker:demo:js:pluck": "docker compose exec sandbox npm run demo:js:pluck",
+    "docker:demo:ts:hotmesh": "docker compose exec sandbox npm run demo:ts:hotmesh",
+    "docker:demo:ts:durable": "docker compose exec sandbox npm run demo:ts:durable",
+    "docker:demo:ts:pluck": "docker compose exec sandbox npm run demo:ts:pluck",
     "_docker:build:up": "docker compose watch",
     "_copy_env_example": "cp -n env.example .env"
   },
@@ -32,5 +38,10 @@
   "dependencies": {
     "@hotmeshio/pluck": "^0.1.3",
     "redis": "^4.6.10"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "@types/node": "^20.0.0"
   }
 }

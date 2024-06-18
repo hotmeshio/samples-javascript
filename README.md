@@ -1,9 +1,11 @@
 # samples-javascript
-This repo demonstrates the use of HotMesh in a JavaScript environment.The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
+
+This repo demonstrates the use of HotMesh in a JavaScript and TypeScript environment. The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
 
 If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
 
 ## Table of Contents
+
 1. [HotMesh](#hotmesh)
    - [Distributed Orchestration](#distributed-orchestration)
    - [Control Without a Controller](#control-without-a-controller)
@@ -39,9 +41,16 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 - `npm run docker:logs:redis` - View Redis logs
 
 ### Run the Demos
-- `npm run docker:demo:hotmesh howdy` - Run the *HotMesh* lifecycle example
-- `npm run docker:demo:durable` - Run the *Durable* lifecycle example
-- `npm run docker:demo:pluck cat dog mouse` - Run the *Pluck* lifecycle example
+
+#### JavaScript Examples
+- `npm run docker:demo:js:hotmesh howdy` - Run the *HotMesh* lifecycle example (JavaScript)
+- `npm run docker:demo:js:durable` - Run the *Durable* lifecycle example (JavaScript)
+- `npm run docker:demo:js:pluck cat dog mouse` - Run the *Pluck* lifecycle example (JavaScript)
+
+#### TypeScript Examples
+- `npm run docker:demo:ts:hotmesh howdy` - Run the *HotMesh* lifecycle example (TypeScript)
+- `npm run docker:demo:ts:durable` - Run the *Durable* lifecycle example (TypeScript)
+- `npm run docker:demo:ts:pluck cat dog mouse` - Run the *Pluck* lifecycle example (TypeScript)
 
 ## HotMesh
 ### Distributed Orchestration
