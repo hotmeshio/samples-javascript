@@ -35,13 +35,13 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 ### Get started
 - `npm run docker:up` - Build
 - `npm run open:redis` - Open RedisInsight [password is `key_admin`]
-- `npm run docker:reset-redis` - Reset Redis
+- `npm run docker:reset-redis` - Reset Redis [reset database]
 - `npm run docker:logs:redis` - View Redis logs
 
 ### Run the Demos
-- `npm run docker:demo:hotmesh howdy` - Run the HotMesh lifecycle example
-- `npm run docker:demo:durable` - Run the Durale lifecycle example
-- `npm run docker:demo:pluck cat dog mouse` - Run the Pluck lifecycle example
+- `npm run docker:demo:hotmesh howdy` - Run the *HotMesh* lifecycle example
+- `npm run docker:demo:durable` - Run the *Durable* lifecycle example
+- `npm run docker:demo:pluck cat dog mouse` - Run the *Pluck* lifecycle example
 
 ## HotMesh
 ### Distributed Orchestration
@@ -60,7 +60,7 @@ Here, for example, is the `worker` activity type. It's reentrant (most activitie
 <img src="./img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
 
 
->Process orchestration is emergent within HotMesh and occurs naturally as a result of routing messages. While the reference implementation targets Redis+TypeScript, any multimodal database (ValKey, DragonFly, etc) can be leveraged.
+>Process orchestration is emergent within HotMesh and occurs naturally as a result of processing stream messages. While the reference implementation targets Redis+TypeScript, any language (Rust, Go, Python, Java) and multimodal database (ValKey, DragonFly, etc) can take advantage of the *sequence engine* design pattern.
 
 ### Control Without a Controller
 HotMesh is designed as a distributed quorum of engines where each member adheres to the principles of CQRS. According to CQRS, *consumers* are instructed to read events from assigned topic queues while *producers* write to said queues. This division of labor is essential to the smooth running of the system. HotMesh leverages this principle to drive the perpetual behavior of engines and workers (along with other advantages described [here](https://github.com/hotmeshio/sdk-typescript/blob/main/docs/distributed_orchestration.md)). 
@@ -102,7 +102,7 @@ const hotMesh = await HotMesh.init({
   engine: {
     redis: {
       class: Redis,
-      options: { host, port, password, db }
+      options: { url: 'redis://:key_admin@redis:6379' }
     }
   },
 
@@ -111,7 +111,7 @@ const hotMesh = await HotMesh.init({
       topic: 'work.do',
       redis: {
         class: Redis,
-        options: { host, port, password, db }
+        options: { url: 'redis://:key_admin@redis:6379' }
       }
       callback: async (data: StreamData) => {
         return {

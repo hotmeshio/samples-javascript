@@ -1,4 +1,4 @@
-//USAGE            `npm demo:hotmesh howdy`        ///////
+//USAGE            `npm run demo:hotmesh howdy`        ///////
 
 //0) Import HotMesh and Redis
 console.log('initializing hotmesh demo ...\n');

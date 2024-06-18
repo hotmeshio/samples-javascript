@@ -1,4 +1,4 @@
-//USAGE            `npm demo:durable`        ///////
+//USAGE            `npm run demo:durable`        ///////
 
 //0) Import Durable and Redis and workflow
 console.log('initializing durable demo ...\n');

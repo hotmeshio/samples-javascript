@@ -1,4 +1,4 @@
-//USAGE            `npm test cat dog mouse`        ///////
+//USAGE            `npm run demo:pluck cat dog mouse`        ///////
 
 //0) Import Pluck and Redis
 console.log('\n* initializing pluck demo ...\n');
