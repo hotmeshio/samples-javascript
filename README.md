@@ -141,7 +141,7 @@ const response = await hotMesh.pubsub('myfirstapp.test', {});
 ## Durable
 
 ### High-speed, Serverless Temporal
-HotMesh's *Durable* module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly platform. It is included to help developers get the benefits of HotMesh without learning the YAML syntax. If you're familiar with Temporal's TypeScript SDK, the principles are exactly the same. But because it's backed by an in-memory data store (Redis), its millisecond-level performance might be better suited for those transactions requiring millisecond execution times.
+HotMesh's *Durable* module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly platform. It is included to help developers get the benefits of HotMesh without learning the YAML modeling system. And it showcases how the HotMesh design system can redeploy existing orchestration servers (e.g., Temporal, MuleSoft) as distributed, serverless compute engines. If you're familiar with Temporal, the Durable module is designed to match. But because it's backed by an in-memory data store (Redis), its millisecond-level performance might be better suited for those transactions requiring millisecond execution times.
 
 The [HotMesh Durable Module](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server. The [Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/durable/schemas/factory.ts) is authored in YAML and describes Temporal's application server as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like reentry, collation, composition, throttling, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal.
 
@@ -403,7 +403,6 @@ const response = await pluck.exec({
 ```
 
 Refer to the [SDK/Docs](https://hotmeshio.github.io/pluck-typescript/index.html) for a full overview of Pluck's features.
-
 ## Build
 The application includes a docker-compose file that spins up one Redis instance and one Node instance. To build the application, run the following command:
 
@@ -411,22 +410,74 @@ The application includes a docker-compose file that spins up one Redis instance 
 docker-compose up --build -d
 ```
 
-## Run/Demo HotMesh
+## Run the Demos
+
+### JavaScript Examples
+
+#### Run/Demo HotMesh (JavaScript)
 This demo deploys a custom YAML model and a linked worker function to demonstrate the full end-to-end lifecycle.
+From within the container:
 ```bash
-npm run demo:hotmesh greetings
+npm run docker:demo:js:hotmesh greetings
+```
+From outside the container:
+```bash
+npm run demo:js:hotmesh greetings
 ```
 
-## Run/Demo Durable
+#### Run/Demo Durable (JavaScript)
 This demo shows a basic durable workflow with support for *retry*. It throws errors 50% of the time and eventually recovers, logging the result of the workflow execution to the log. The retry cycle is set at 5 seconds.
-
+From within the container:
 ```bash
-npm run demo:durable
+npm run docker:demo:js:durable
+```
+From outside the container:
+```bash
+npm run demo:js:durable
 ```
 
-## Run/Demo Pluck
+#### Run/Demo Pluck (JavaScript)
 This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
-
+From within the container:
 ```bash
-npm run demo:pluck cat dog mouse
+npm run docker:demo:js:pluck cat dog mouse
+```
+From outside the container:
+```bash
+npm run demo:js:pluck cat dog mouse
+```
+
+### TypeScript Examples
+
+#### Run/Demo HotMesh (TypeScript)
+This demo deploys a custom YAML model and a linked worker function to demonstrate the full end-to-end lifecycle.
+From within the container:
+```bash
+npm run docker:demo:ts:hotmesh greetings
+```
+From outside the container:
+```bash
+npm run demo:ts:hotmesh greetings
+```
+
+#### Run/Demo Durable (TypeScript)
+This demo shows a basic durable workflow with support for *retry*. It throws errors 50% of the time and eventually recovers, logging the result of the workflow execution to the log. The retry cycle is set at 5 seconds.
+From within the container:
+```bash
+npm run docker:demo:ts:durable
+```
+From outside the container:
+```bash
+npm run demo:ts:durable
+```
+
+#### Run/Demo Pluck (TypeScript)
+This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
+From within the container:
+```bash
+npm run docker:demo:ts:pluck cat dog mouse
+```
+From outside the container:
+```bash
+npm run demo:ts:pluck cat dog mouse
 ```
