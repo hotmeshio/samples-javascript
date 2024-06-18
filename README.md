@@ -1,6 +1,6 @@
 # samples-javascript
 
-This repo demonstrates the use of HotMesh in a JavaScript and TypeScript environment. The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
+This repo demonstrates the use of HotMesh in a JavaScript and TypeScript environment.  The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
 
 If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
 
@@ -23,10 +23,9 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
    - [Execute](#execute)
    - [Execute and Cache](#execute-and-cache)
    - [Execute and Operationalize](#execute-and-operationalize)
-4. [Build](#build)
-5. [Run/Demo HotMesh](#rundemo-hotmesh)
-6. [Run/Demo Durable](#rundemo-durable)
-7. [Run/Demo Pluck](#rundemo-pluck)
+5. [Run the Demos](#run-the-demos)
+   - [JavaScript Examples](#javascript-examples)
+   - [TypeScript Examples](#typescript-examples)
 
 ## Quickstart
 
@@ -40,14 +39,22 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 - `npm run docker:reset-redis` - Reset Redis [reset database]
 - `npm run docker:logs:redis` - View Redis logs
 
-### Run the Demos
+HotMesh works with any Redis-like backend, including ValKey and Dragonfly. A Docker Compose file has been included for each. If you wish to run the demos using a specific backend, use one of the following variants:
 
-#### JavaScript Examples
+- `npm run docker:reset-redis` - Reset Redis [reset and use Redis]
+- `npm run docker:reset-redis:valkey` - Reset ValKey [reset and use ValKey]
+- `npm run docker:reset-redis:dragonfly` - Reset Dragonfly [reset and use Dragonfly]
+
+>All demos will work with all DB variants except for the Pluck demo which uses the Redis FT.SEARCH module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using FT.SEARCH commands. 
+
+### JavaScript
+Run from outside the Docker container.
 - `npm run docker:demo:js:hotmesh howdy` - Run the *HotMesh* lifecycle example (JavaScript)
 - `npm run docker:demo:js:durable` - Run the *Durable* lifecycle example (JavaScript)
 - `npm run docker:demo:js:pluck cat dog mouse` - Run the *Pluck* lifecycle example (JavaScript)
 
-#### TypeScript Examples
+### TypeScript
+Run from outside the Docker container.
 - `npm run docker:demo:ts:hotmesh howdy` - Run the *HotMesh* lifecycle example (TypeScript)
 - `npm run docker:demo:ts:durable` - Run the *Durable* lifecycle example (TypeScript)
 - `npm run docker:demo:ts:pluck cat dog mouse` - Run the *Pluck* lifecycle example (TypeScript)
@@ -56,18 +63,17 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 ### Distributed Orchestration
 *HotMesh* is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
 
-The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
+The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis (or a Redis clone like ValKey) like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
 
 <img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
-The design system is based on a canonical set of 9 principal message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+The design system is based on a canonical set of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
 
 <img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
 
 Here, for example, is the `worker` activity type. It's reentrant (most activities are), which allows your linked functions to emit in-process messages as they complete a task. The messaging system goes beyond basic request/response and fan-out/fan-in patterns, providing real-time progress updates.
 
 <img src="./img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
-
 
 >Process orchestration is emergent within HotMesh and occurs naturally as a result of processing stream messages. While the reference implementation targets Redis+TypeScript, any language (Rust, Go, Python, Java) and multimodal database (ValKey, DragonFly, etc) can take advantage of the *sequence engine* design pattern.
 
@@ -141,9 +147,13 @@ const response = await hotMesh.pubsub('myfirstapp.test', {});
 ## Durable
 
 ### High-speed, Serverless Temporal
-HotMesh's *Durable* module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly platform. It is included to help developers get the benefits of HotMesh without learning the YAML modeling system. And it showcases how the HotMesh design system can redeploy existing orchestration servers (e.g., Temporal, MuleSoft) as distributed, serverless compute engines. If you're familiar with Temporal, the Durable module is designed to match. But because it's backed by an in-memory data store (Redis), its millisecond-level performance might be better suited for those transactions requiring millisecond execution times.
+HotMesh's [Durable](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly SDK. It is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server and showcases how HotMesh can redeploy the *functionality* of an app server like Temporal using a network of stateless message routers. And because it's backed by an in-memory data store (Redis), it's a useful drop-in for those use cases that require millisecond-level performance.
 
-The [HotMesh Durable Module](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server. The [Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/durable/schemas/factory.ts) is authored in YAML and describes Temporal's application server as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like reentry, collation, composition, throttling, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal.
+Here is the telemetry output for a HotMesh Durable workflow with a linked worker function. Workflows can be designed with completion times in the tens of milliseconds, taking advantage of distributed stateless execution and a clustered Redis backend.
+
+<img src="./img/cold_start_exec_times.png" alt="HotMesh millisecond-level cold start and execution times" style="max-width:100%;width:800px;">
+
+The [HotMesh Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/durable/schemas/factory.ts) used to emulate the Temporal application server is authored in YAML and describes Temporal as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like *reentry*, *collation*, *composition*, *throttling*, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal's physical application server.
 
 <img src="./img/temporal_state_machine.png" alt="Temporal reentrant workflow execution as a finite state machine" style="max-width:100%;width:800px;">
 
