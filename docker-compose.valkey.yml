@@ -21,6 +21,7 @@ services:
         condition: service_healthy
     volumes:
       - ./:/app
+      - /app/node_modules
 
   redis:
     image: valkey/valkey:7.2.5
