@@ -45,7 +45,7 @@ HotMesh works with any Redis-like backend, including ValKey and Dragonfly. A Doc
 - `npm run docker:reset-redis:valkey` - Reset ValKey [reset and use ValKey]
 - `npm run docker:reset-redis:dragonfly` - Reset Dragonfly [reset and use Dragonfly]
 
->All demos will work with all DB variants except for the Pluck demo which uses the Redis FT.SEARCH module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using FT.SEARCH commands. 
+>All demos will work with all DB variants except for the Pluck demo which uses the Redis `FT.SEARCH` module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using `FT.SEARCH` commands. 
 
 ### JavaScript
 Run from outside the Docker container.
@@ -67,7 +67,7 @@ The following depicts the mechanics of the approach and describes what is essent
 
 <img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
-The design system is based on a canonical set of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+The design system is based on a [canonical set](https://zenodo.org/records/12168558) of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
 
 <img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
 
@@ -147,7 +147,7 @@ const response = await hotMesh.pubsub('myfirstapp.test', {});
 ## Durable
 
 ### High-speed, Serverless Temporal
-HotMesh's [Durable](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly SDK. It is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server and showcases how HotMesh can redeploy the *functionality* of an app server like Temporal using a network of stateless message routers. And because it's backed by an in-memory data store (Redis), it's a useful drop-in for those use cases that require millisecond-level performance.
+HotMesh's [Durable](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly SDK. It is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server and showcases how HotMesh can redeploy the *functionality* of an app server like Temporal using stateless message routers. And because it's backed by an in-memory data store (Redis), it's a useful drop-in for those use cases that require millisecond-level performance.
 
 Here is the telemetry output for a HotMesh Durable workflow with a linked worker function. Workflows can be designed with completion times in the tens of milliseconds, taking advantage of distributed stateless execution and a clustered Redis backend.
 
@@ -157,7 +157,7 @@ The [HotMesh Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/servi
 
 <img src="./img/temporal_state_machine.png" alt="Temporal reentrant workflow execution as a finite state machine" style="max-width:100%;width:800px;">
 
-The standard set of expected static methods is available, including: 
+The standard set of expected static workflow methods are available for use in your functions: 
 
  - `waitFor` Pause your function using your chosen signal key, and only awaken when the signal is received from the outide. Use a standard `Promise` to collate and cache the signals and only awaken your function once all signals have arrived.
     ```javascript
