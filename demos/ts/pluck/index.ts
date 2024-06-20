@@ -1,9 +1,13 @@
-//USAGE            `npm run demo:pluck cat dog mouse`        ///////
+//USAGE            `npm run demo:ts:pluck cat dog mouse`        ///////
 
-//0) Import Pluck and Redis
 console.log('\n* initializing pluck demo ...\n');
+
+import 'dotenv/config';
 import { HotMeshTypes, Pluck } from '@hotmeshio/pluck';
 import * as Redis from 'redis';
+import { setupTelemetry } from '../../../telemetry/index';
+
+setupTelemetry();
 
 (async () => {
   try {

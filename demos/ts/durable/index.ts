@@ -1,10 +1,14 @@
-//USAGE            `npm run demo:durable`        ///////
+//USAGE            `npm run demo:ts:durable`        ///////
 
-//0) Import Durable and Redis and workflow
 console.log('initializing durable demo ...\n');
+
+import 'dotenv/config';
 import { Durable, HotMesh } from '@hotmeshio/pluck';
 import * as Redis from 'redis';
 import * as workflows from './workflows';
+import { setupTelemetry } from '../../../telemetry/index';
+
+setupTelemetry();
 
 (async () => {
   try {

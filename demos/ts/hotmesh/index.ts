@@ -1,10 +1,13 @@
-//USAGE            `npm run demo:hotmesh howdy`        ///////
+//USAGE            `npm run demo:ts:hotmesh howdy`        ///////
 
-//0) Import HotMesh and Redis
 console.log('initializing hotmesh demo ...\n');
 
+import 'dotenv/config';
 import { HotMesh } from '@hotmeshio/pluck';
 import * as Redis from 'redis';
+import { setupTelemetry } from '../../../telemetry/index';
+
+setupTelemetry();
 const redisConfig = {
   class: Redis,
   options: {

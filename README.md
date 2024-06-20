@@ -26,6 +26,8 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 5. [Run the Demos](#run-the-demos)
    - [JavaScript Examples](#javascript-examples)
    - [TypeScript Examples](#typescript-examples)
+6. [Visualize | Open Telemetry](#visualize--opentelemetry)
+6. [Visualize | Redis Insight](#visualize--redisinsight)
 
 ## Quickstart
 
@@ -414,13 +416,6 @@ const response = await pluck.exec({
 
 Refer to the [SDK/Docs](https://hotmeshio.github.io/pluck-typescript/index.html) for a full overview of Pluck's features.
 
-## Build
-The application includes a docker-compose file that spins up one Redis instance and one Node instance. To build the application, run the following command:
-
-```bash
-docker-compose up --build -d
-```
-
 ## Run the Demos
 
 ### JavaScript Examples
@@ -492,3 +487,13 @@ From outside the container:
 ```bash
 npm run docker:demo:ts:pluck cat dog mouse
 ```
+
+## Visualize | OpenTelemetry
+Add your HoneyComb credentials to `.env`, and view the full *OpenTelemetry* execution tree organized as a DAG.
+
+<img src="./img/opentelemetry.png" alt="Open Telemetry" style="width:600px;max-width:600px;">
+
+## Visualize | RedisInsight
+View commands, streams, data, etc using RedisInsight.
+
+<img src="./img/redisinsight.png" alt="Redis Insight" style="width:600px;max-width:600px;">
