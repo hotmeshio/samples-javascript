@@ -1,7 +1,7 @@
 //USAGE            `npm run demo:js:durable`        ///////
 
-//0) Import Durable and Redis and workflow
 console.log('initializing durable demo ...\n');
+
 const { Durable, HotMesh } = require('@hotmeshio/pluck');
 const Redis = require('redis');
 const workflows = require('./workflows');

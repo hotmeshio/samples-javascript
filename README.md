@@ -1,8 +1,8 @@
 # samples-javascript
 
-This repo demonstrates the use of HotMesh in a JavaScript and TypeScript environment.  The examples are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow, including: import, design, deploy, activate, execute, shutdown, etc.
+This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow.
 
-If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module might be easiest to adopt, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
+If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module will be easiest to understand, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
 
 ## Table of Contents
 
@@ -28,6 +28,7 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
    - [TypeScript Examples](#typescript-examples)
 6. [Visualize | Open Telemetry](#visualize--opentelemetry)
 6. [Visualize | Redis Insight](#visualize--redisinsight)
+6. [Visualize | HotMesh Dashboard](#visualize--hotmesh-dashboard)
 
 ## Quickstart
 
@@ -69,7 +70,7 @@ The following depicts the mechanics of the approach and describes what is essent
 
 <img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
-The design system is based on a [canonical set](https://zenodo.org/records/12168558) of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+The modeling system is based on a [canonical set](https://zenodo.org/records/12168558) of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
 
 <img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
 
@@ -101,7 +102,7 @@ app:
           type: worker
           topic: work.do
       transitions:
-        mytrigger:
+        t1:
           - to: w1
 ```
 
@@ -489,7 +490,7 @@ npm run docker:demo:ts:pluck cat dog mouse
 ```
 
 ## Visualize | OpenTelemetry
-Add your HoneyComb credentials to `.env`, and view the full *OpenTelemetry* execution tree organized as a DAG.
+Add your Honeycomb credentials to `.env`, and view the full *OpenTelemetry* execution tree organized as a DAG.
 
 <img src="./img/opentelemetry.png" alt="Open Telemetry" style="width:600px;max-width:600px;">
 
@@ -497,3 +498,10 @@ Add your HoneyComb credentials to `.env`, and view the full *OpenTelemetry* exec
 View commands, streams, data, etc using RedisInsight.
 
 <img src="./img/redisinsight.png" alt="Redis Insight" style="width:600px;max-width:600px;">
+
+## Visualize | HotMesh Dashboard
+The HotMesh dashboard provides a visual representation of the network, including the number of engines, workers, and workflows. It also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
+
+An LLM is also included to simplify querying and analyzing workflow data for those deployments that include the Redis `FT.SEARCH` module.
+
+<img src="./img/hotmesh_dashboard.png" alt="HotMesh Dashboard" style="width:600px;max-width:600px;">

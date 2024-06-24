@@ -1,6 +1,5 @@
 //USAGE            `npm run demo:js:hotmesh howdy`        ///////
 
-//0) Import HotMesh and Redis
 console.log('initializing hotmesh demo ...\n');
 
 const { HotMesh } = require('@hotmeshio/pluck');
@@ -17,6 +16,7 @@ const redisConfig = {
   //init an engine and worker
   const hotMesh = await HotMesh.init({
     appId: 'hotmesh',
+    logLevel: process.env.HMSH_LOG_LEVEL || 'debug',
     engine: {
       redis: redisConfig,
     },

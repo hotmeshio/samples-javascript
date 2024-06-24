@@ -1,7 +1,7 @@
 //USAGE            `npm run demo:js:pluck cat dog mouse`        ///////
 
-//0) Import Pluck and Redis
 console.log('\n* initializing pluck demo ...\n');
+
 const { Pluck } = require('@hotmeshio/pluck');
 const Redis = require('redis');
 
