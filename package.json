@@ -1,6 +1,6 @@
 {
   "name": "samples-javascript",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
     "demo:js:hotmesh": "NODE_ENV=test HMSH_BLOCK_TIME_MS=5000 node demos/js/hotmesh/index.js",
@@ -45,7 +45,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@honeycombio/opentelemetry-node": "^0.7.2",
-    "@hotmeshio/pluck": "^0.1.3",
+    "@hotmeshio/pluck": "^0.1.7",
     "@opentelemetry/auto-instrumentations-node": "^0.47.1",
     "@opentelemetry/sdk-node": "^0.52.1",
     "dotenv": "^16.4.5",
