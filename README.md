@@ -1,4 +1,4 @@
-# samples-javascript
+# HotMesh Samples
 
 This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow.
 
