@@ -2,7 +2,7 @@
 
 This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow.
 
-If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *Durable* module will be easiest to understand, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *Pluck*.
+If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *MeshFlow* module will be easiest to understand, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *MeshData*.
 
 ## Table of Contents
 
@@ -10,14 +10,18 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
    - [Distributed Orchestration](#distributed-orchestration)
    - [Control Without a Controller](#control-without-a-controller)
    - [Model-driven Development](#model-driven-development)
-2. [Durable](#durable)
-   - [High-speed, Serverless Temporal](#high-speed-serverless-temporal)
+2. [MeshCall](#meshcall)
+   - [Connect Everything](#connect-everything)
+   - [Link the Cron Function](#link-the-cron-function)
+   - [Run the Cron Function](#run-the-cron-function)
+2. [MeshFlow](#meshflow)
+   - [Transactional Workflow](#transactional-workflow)
    - [Activities](#activities)
    - [Workflows](#workflows)
    - [Client](#client)
    - [Worker](#worker)
-3. [Pluck](#pluck)
-   - [Hybrid Transactional Analytical Processing (HTAP)](#hybrid-transactional-analytical-processing-htap)
+3. [MeshData](#meshdata)
+   - [Transactional Analytics](#transactional-analytics)
    - [Ad hoc Operational Networks](#ad-hoc-operational-networks)
    - [Connect](#connect)
    - [Execute](#execute)
@@ -48,23 +52,25 @@ HotMesh works with any Redis-like backend, including ValKey and Dragonfly. A Doc
 - `npm run docker:reset-redis:valkey` - Reset ValKey [reset and use ValKey]
 - `npm run docker:reset-redis:dragonfly` - Reset Dragonfly [reset and use Dragonfly]
 
->All demos will work with all DB variants except for the Pluck demo which uses the Redis `FT.SEARCH` module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using `FT.SEARCH` commands. 
+>All demos will work with all DB variants except for the MeshData demo which uses the Redis `FT.SEARCH` module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using `FT.SEARCH` commands. 
 
 ### JavaScript
 Run from outside the Docker container.
 - `npm run docker:demo:js:hotmesh howdy` - Run the *HotMesh* lifecycle example (JavaScript)
-- `npm run docker:demo:js:durable` - Run the *Durable* lifecycle example (JavaScript)
-- `npm run docker:demo:js:pluck cat dog mouse` - Run the *Pluck* lifecycle example (JavaScript)
+- `npm run docker:demo:js:meshcall` - Run the *MeshCall* lifecycle example (JavaScript)
+- `npm run docker:demo:js:meshflow` - Run the *MeshFlow* lifecycle example (JavaScript)
+- `npm run docker:demo:js:meshdata cat dog mouse` - Run the *MeshData* lifecycle example (JavaScript)
 
 ### TypeScript
 Run from outside the Docker container.
 - `npm run docker:demo:ts:hotmesh howdy` - Run the *HotMesh* lifecycle example (TypeScript)
-- `npm run docker:demo:ts:durable` - Run the *Durable* lifecycle example (TypeScript)
-- `npm run docker:demo:ts:pluck cat dog mouse` - Run the *Pluck* lifecycle example (TypeScript)
+- `npm run docker:demo:ts:meshcall` - Run the *MeshCall* lifecycle example (TypeScript)
+- `npm run docker:demo:ts:meshflow` - Run the *MeshFlow* lifecycle example (TypeScript)
+- `npm run docker:demo:ts:meshdata cat dog mouse` - Run the *MeshData* lifecycle example (TypeScript)
 
 ## HotMesh
 ### Distributed Orchestration
-*HotMesh* is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
+[HotMesh](https://hotmeshio.github.io/sdk-typescript/classes/services_hotmesh.HotMesh.html) is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
 
 The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis (or a Redis clone like ValKey) like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
 
@@ -147,16 +153,55 @@ const response = await hotMesh.pubsub('myfirstapp.test', {});
 //returns {}
 ```
 
-## Durable
+## MeshCall
 
-### High-speed, Serverless Temporal
-HotMesh's [Durable](https://github.com/hotmeshio/sdk-typescript/tree/main/services/durable) module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly SDK. It is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server and showcases how HotMesh can redeploy the *functionality* of an app server like Temporal using stateless message routers. And because it's backed by an in-memory data store (Redis), it's a useful drop-in for those use cases that require millisecond-level performance.
+### Connect Everything
+The [MeshCall](https://hotmeshio.github.io/sdk-typescript/classes/services_meshcall.MeshCall.html) module connects any function with a connection to Redis. Function responses are cacheable and functions can even run as idempotent cron jobs. Make blazing fast interservice calls that return in milliseconds without the overhead of HTTP.
 
-Here is the telemetry output for a HotMesh Durable workflow with a linked worker function. Workflows can be designed with completion times in the tens of milliseconds, taking advantage of distributed stateless execution and a clustered Redis backend.
+### Link the Cron Function
+This example demonstrates an *idempotent* cron that runs every day. The `id` makes each cron job unique and ensures that only one instance runs, despite repeated invocations.
+
+The `cron` method fails silently if a workflow is already running with the same `id`. Optionally set a `delay` and/or set `maxCycles` to limit the number of cycles.
+
+```javascript
+//cron.ts
+import { MeshCall } from '@hotmeshio/hotmesh';
+import * as Redis from 'redis';
+
+export const runMyCron = (id: string, interval = '1 day') => {
+  MeshCall.cron({
+    topic: 'my.cron.function',
+    redis: {
+      class: Redis,
+      options: { url: 'redis://:key_admin@redis:6379' }
+    },
+    callback: async () => {
+      //your code here...
+    },
+    options: { id, interval, maxCycles: 24 }
+  });
+};
+```
+
+### Run the Cron Function
+Call `runMyCron` at server startup (or call as needed to run multiple crons).
+
+```javascript
+//server.ts
+import { runMyCron } from './cron';
+runMyCron('myDailyCron123');
+```
+
+## MeshFlow
+
+### Transactional Workflow
+HotMesh's [MeshFlow](https://hotmeshio.github.io/sdk-typescript/classes/services_meshflow.MeshFlow.html) module (included alongside HotMesh in the same NPM package) is modeled after Temporal's developer-friendly SDK. It is a behavioral clone of **both** the Temporal TypeScript SDK and the Temporal backend application server and showcases how HotMesh can redeploy the *functionality* of an app server like Temporal using stateless message routers. And because it's backed by an in-memory data store (Redis), it's a useful drop-in for those use cases that require millisecond-level performance.
+
+Here is the telemetry output for a HotMesh MeshFlow workflow with a linked worker function. Workflows can be designed with completion times in the tens of milliseconds, taking advantage of distributed stateless execution and a clustered Redis backend.
 
 <img src="./img/cold_start_exec_times.png" alt="HotMesh millisecond-level cold start and execution times" style="max-width:100%;width:800px;">
 
-The [HotMesh Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/durable/schemas/factory.ts) used to emulate the Temporal application server is authored in YAML and describes Temporal as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like *reentry*, *collation*, *composition*, *throttling*, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal's physical application server.
+The [HotMesh Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/meshflow/schemas/factory.ts) used to emulate the Temporal application server is authored in YAML and describes Temporal as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like *reentry*, *collation*, *composition*, *throttling*, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal's physical application server.
 
 <img src="./img/temporal_state_machine.png" alt="Temporal reentrant workflow execution as a finite state machine" style="max-width:100%;width:800px;">
 
@@ -164,8 +209,8 @@ The standard set of expected static workflow methods are available for use in yo
 
  - `waitFor` Pause your function using your chosen signal key, and only awaken when the signal is received from the outide. Use a standard `Promise` to collate and cache the signals and only awaken your function once all signals have arrived.
     ```javascript
-    import { Durable } from '@hotmeshio/hotmesh';
-    const { waitFor } = Durable.workflow;
+    import { MeshFlow } from '@hotmeshio/hotmesh';
+    const { waitFor } = MeshFlow.workflow;
 
     const [a, b] = await Promise.all([
       waitFor<{payload: string}>('sig1'),
@@ -174,11 +219,11 @@ The standard set of expected static workflow methods are available for use in yo
     ```
  - `signal` Send a signal (and payload) to a paused function awaiting the signal. Signals may also be sent from the outside to awaken a paused function.
     ```javascript
-    await Durable.workflow.signal('sig1', {payload: 'hi!'});
+    await MeshFlow.workflow.signal('sig1', {payload: 'hi!'});
     ```
  - `hook` Redis governance converts your functions into 're-entrant processes'. Optionally use the *hook* method to spawn parallel execution threads to augment a running workflow.
     ```javascript
-    await Durable.workflow.hook({
+    await MeshFlow.workflow.hook({
       workflowName: 'newsletter',
       taskQueue: 'default',
       args: []
@@ -186,23 +231,23 @@ The standard set of expected static workflow methods are available for use in yo
     ```
  - `sleepFor` Pause function execution for a ridiculous amount of time (months, years, etc). There's no risk of information loss, as Redis governs function state. When your function awakens, function state is efficiently (and automatically) restored and your function will resume right where it left off.
     ```javascript
-    await Durable.workflow.sleepFor('1 month');
+    await MeshFlow.workflow.sleepFor('1 month');
     ```
  - `random` Generate a deterministic random number that can be used in a reentrant process workflow (replaces `Math.random()`).
     ```javascript
-    const random = await Durable.workflow.random();
+    const random = await MeshFlow.workflow.random();
     ```
- - `execChild` Call another durable function and await the response. *Design sophisticated, multi-process solutions by leveraging this command.*
+ - `execChild` Call another meshflow function and await the response. *Design sophisticated, multi-process solutions by leveraging this command.*
     ```javascript
-    const jobResponse = await Durable.workflow.execChild({
+    const jobResponse = await MeshFlow.workflow.execChild({
       workflowName: 'newsletter',
       taskQueue: 'default',
       args: [{ id, user_id, etc }],
     });
     ```
- - `startChild` Call another durable function, but do not await the response.
+ - `startChild` Call another meshflow function, but do not await the response.
     ```javascript
-    const jobId = await Durable.workflow.startChild({
+    const jobId = await MeshFlow.workflow.startChild({
       workflowName: 'newsletter',
       taskQueue: 'default',
       args: [{ id, user_id, etc }],
@@ -210,11 +255,11 @@ The standard set of expected static workflow methods are available for use in yo
     ```
  - `getContext` Get the current workflow context (workflowId, replay history, replay index, etc).
     ```javascript
-    const context = await Durable.workflow.getContext();
+    const context = await MeshFlow.workflow.getContext();
     ```
  - `search` Instance a search session
     ```javascript
-    const search = await Durable.workflow.search();
+    const search = await MeshFlow.workflow.search();
     ```
     - `set` Set one or more name/value pairs
       ```javascript
@@ -241,7 +286,7 @@ The standard set of expected static workflow methods are available for use in yo
       const value = await search.mult('name', 12);
       ```
 
-Developers already familiar with Temporal will recognize the standard top-level constructs used in the example: `activities`, `workflows`, `workers` and `clients`. Specifically, the example proxies two activities, one of which will throw random errors. But the workflow eventually succeeds as it is a durable, reentrant workflow.
+Developers already familiar with Temporal will recognize the standard top-level constructs used in the example: `activities`, `workflows`, `workers` and `clients`. Specifically, the example proxies two activities, one of which will throw random errors. But the workflow eventually succeeds as it is a meshflow, reentrant workflow.
 
 ### Activities
 Start by defining **activities**. They can be written in any style, using any framework, and can even be legacy functions you've already written. *Note how the `saludar` example throws an error 50% of the time. It doesn't matter how unpredictable your functions are, HotMesh will retry as necessary until they succeed.*
@@ -263,10 +308,10 @@ Define **workflow** logic. Include conditional branching, loops, etc to control 
 
 ```javascript
 //workflows.ts
-import { Durable } from '@hotmeshio/hotmesh';
+import { MeshFlow } from '@hotmeshio/hotmesh';
 import * as activities from './activities';
 
-const { greet, saludar } = Durable.workflow
+const { greet, saludar } = MeshFlow.workflow
   .proxyActivities<typeof activities>({
     activities
   });
@@ -285,11 +330,11 @@ Instance a HotMesh **client** to invoke the workflow.
 
 ```javascript
 //client.ts
-import { Durable, HotMesh } from '@hotmeshio/hotmesh';
+import { MeshFlow, HotMesh } from '@hotmeshio/hotmesh';
 import * as Redis from 'redis';
 
 async function run(): Promise<string> {
-  const client = new Durable.Client({
+  const client = new MeshFlow.Client({
     connection: {
       class: Redis,
       options: { url: 'redis://:key_admin@localhost:6379' }
@@ -313,12 +358,12 @@ Create a **worker** and link your workflow function. Workers listen for tasks on
 
 ```javascript
 //worker.ts
-import { Durable } from '@hotmeshio/hotmesh';
+import { MeshFlow } from '@hotmeshio/hotmesh';
 import * as Redis from 'redis';
 import * as workflows from './workflows';
 
 async function run() {
-  const worker = await Durable.Worker.create({
+  const worker = await MeshFlow.Worker.create({
     connection: {
       class: Redis,
       options: { url: 'redis://:key_admin@localhost:6379' },
@@ -331,13 +376,13 @@ async function run() {
 }
 ``` 
 
-## Pluck
-### Hybrid Transactional Analytical Processing (HTAP)
-For those deployments with the Redis `FT.SEARCH` module enabled, it's possible to deploy [HTAP](https://en.wikipedia.org/wiki/Hybrid_transactional/analytical_processing) solutions using Pluck, enabling millisecond-level *transactional processing* with *real-time analytics*. Even without `FT.SEARCH` enabled, Pluck's easy-to-use, functional style makes it an excellent starting point for both new development and refactoring. Key features include:
+## MeshData
+### Transactional Analytics
+For those deployments with the Redis `FT.SEARCH` module enabled, it's possible to deploy [HTAP](https://en.wikipedia.org/wiki/Hybrid_transactional/analytical_processing) solutions using MeshData, enabling millisecond-level *transactional processing* with *real-time analytics*. Even without `FT.SEARCH` enabled, MeshData's easy-to-use, functional style makes it an excellent starting point for both new development and refactoring. Key features include:
 
 - `Easy Integration`: Seamlessly integrates into existing code bases, allowing for the refactoring of legacy systems without extensive overhaul.
 - `Ad Hoc Network Creation`: Facilitates the creation of an operational data layer by connecting functions into a single, manageable mesh.
-- `Durable Workflow Support`: Supports the transformation of functions into durable workflows with Redis-backed persistence.
+- `MeshFlow Workflow Support`: Supports the transformation of functions into meshflow workflows with Redis-backed persistence.
 - `Flexible Function Invocation`: Functions can be called remotely with ease, supporting both cached and uncached execution modes.
 - `Workflow Extensions`: Offers a suite of workflow extension methods including hooks for extending functionality, signal handling for inter-process communication, and sleep for delaying execution.
 - `Search and Indexing`: Provides tools for managing workflow state and leveraging Redis' search capabilities to query operational data.
@@ -347,7 +392,7 @@ The following is a typical microservices network, with a tangled mess of service
 
 <img src="./img/operational_data_layer.png" alt="A Tangled Microservices Network with 3 valuable functions buried within" style="max-width:100%;width:600px;">
 
-Pluck creates an *ad hoc*, Redis-backed network of functions (an "operational data layer"). It's a simple, yet powerful, way to expose and unify your most important functions into a single mesh.
+MeshData creates an *ad hoc*, Redis-backed network of functions (an "operational data layer"). It's a simple, yet powerful, way to expose and unify your most important functions into a single mesh.
 
 *Any service with access to Redis can join in the network, bypassing the legacy clutter.*
 
@@ -356,16 +401,16 @@ Easily expose your target functions. Here the legacy `getUser` function is regis
 
 ```javascript
 import * as Redis from 'redis'; //or `import Redis from 'ioredis'`
-import { Pluck } from '@hotmeshio/pluck'
+import { MeshData } from '@hotmeshio/hotmesh'
 
-const pluck = new Pluck(Redis, { url: 'redis://:key_admin@localhost:6379' });
+const meshdata = new MeshData(Redis, { url: 'redis://:key_admin@localhost:6379' });
 
 const getUser = async (id: string) => {
   //...fetch user from DB: { id: 'jsmith123', name: 'Jan Smith', ... }
   return user;
 }
 
-pluck.connect({
+meshdata.connect({
   entity: 'user',
   target: getUser,
 });
@@ -376,11 +421,11 @@ Call connected functions from anywhere on the network with a connection to Redis
 
 ```javascript
 import * as Redis from 'redis';
-import { Pluck } from '@hotmeshio/pluck'
+import { MeshData } from '@hotmeshio/hotmesh'
 
-const pluck = new Pluck(Redis, { url: 'redis://:key_admin@localhost:6379' });
+const meshdata = new MeshData(Redis, { url: 'redis://:key_admin@localhost:6379' });
 
-const response = await pluck.exec({
+const response = await meshdata.exec({
   entity: 'user',
   args: ['jsmith123'],
 });
@@ -392,7 +437,7 @@ const response = await pluck.exec({
 Provide an `id` and `ttl` flag in the format `1 minute`, `2 weeks`, `3 months`, etc to cache the function response. This is a great way to alleviate an overburdened database...and it's a familiar pattern for those who already use Redis as a cache.
 
 ```javascript
-const response = await pluck.exec({
+const response = await meshdata.exec({
   entity: 'user',
   args: ['jsmith123'],
   options: { id: 'jsmith123', ttl: '15 minutes' },
@@ -405,7 +450,7 @@ const response = await pluck.exec({
 Provide a `ttl` of `infinity` to operationalize the function. It's now a **durable workflow** with all the benefits of Redis-backed governance.
 
 ```javascript
-const response = await pluck.exec({
+const response = await meshdata.exec({
   entity: 'user',
   args: ['jsmith123'],
   options: { id: 'jsmith123', ttl: 'infinity' },
@@ -415,7 +460,7 @@ const response = await pluck.exec({
 // AND REMAINS ACTIVE!
 ```
 
-Refer to the [SDK/Docs](https://hotmeshio.github.io/pluck-typescript/index.html) for a full overview of Pluck's features.
+Refer to the [SDK/Docs](https://hotmeshio.github.io/meshdata-typescript/index.html) for a full overview of MeshData's features.
 
 ## Run the Demos
 
@@ -432,26 +477,36 @@ From outside the container:
 npm run docker:demo:js:hotmesh greetings
 ```
 
-#### Run/Demo Durable (JavaScript)
+#### Run/Demo MeshCall (JavaScript)
+This demo shows interservice function calls with caching support.
+From within the container:
+```bash
+npm run demo:js:meshcall
+```
+From outside the container:
+```bash
+npm run docker:demo:js:meshcall
+```
+#### Run/Demo MeshFlow (JavaScript)
 This demo shows a basic durable workflow with support for *retry*. It throws errors 50% of the time and eventually recovers, logging the result of the workflow execution to the log. The retry cycle is set at 5 seconds.
 From within the container:
 ```bash
-npm run demo:js:durable
+npm run demo:js:meshflow
 ```
 From outside the container:
 ```bash
-npm run docker:demo:js:durable
+npm run docker:demo:js:meshflow
 ```
 
-#### Run/Demo Pluck (JavaScript)
+#### Run/Demo MeshData (JavaScript)
 This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
 From within the container:
 ```bash
-npm run demo:js:pluck cat dog mouse
+npm run demo:js:meshdata cat dog mouse
 ```
 From outside the container:
 ```bash
-npm run docker:demo:js:pluck cat dog mouse
+npm run docker:demo:js:meshdata cat dog mouse
 ```
 
 ### TypeScript Examples
@@ -467,26 +522,37 @@ From outside the container:
 npm run docker:demo:ts:hotmesh greetings
 ```
 
-#### Run/Demo Durable (TypeScript)
+#### Run/Demo MeshCall (TypeScript)
+This demo shows interservice function calls with caching support.
+From within the container:
+```bash
+npm run demo:ts:meshcall
+```
+From outside the container:
+```bash
+npm run docker:demo:ts:meshcall
+```
+
+#### Run/Demo MeshFlow (TypeScript)
 This demo shows a basic durable workflow with support for *retry*. It throws errors 50% of the time and eventually recovers, logging the result of the workflow execution to the log. The retry cycle is set at 5 seconds.
 From within the container:
 ```bash
-npm run demo:ts:durable
+npm run demo:ts:meshflow
 ```
 From outside the container:
 ```bash
-npm run docker:demo:ts:durable
+npm run docker:demo:ts:meshflow
 ```
 
-#### Run/Demo Pluck (TypeScript)
+#### Run/Demo MeshData (TypeScript)
 This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
 From within the container:
 ```bash
-npm run demo:ts:pluck cat dog mouse
+npm run demo:ts:meshdata cat dog mouse
 ```
 From outside the container:
 ```bash
-npm run docker:demo:ts:pluck cat dog mouse
+npm run docker:demo:ts:meshdata cat dog mouse
 ```
 
 ## Visualize | OpenTelemetry

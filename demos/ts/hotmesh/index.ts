@@ -3,7 +3,7 @@
 console.log('initializing hotmesh demo ...\n');
 
 import 'dotenv/config';
-import { HotMesh } from '@hotmeshio/pluck';
+import { HotMesh } from '@hotmeshio/hotmesh';
 import * as Redis from 'redis';
 import { setupTelemetry } from '../../../telemetry/index';
 

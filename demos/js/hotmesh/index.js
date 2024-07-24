@@ -2,7 +2,7 @@
 
 console.log('initializing hotmesh demo ...\n');
 
-const { HotMesh } = require('@hotmeshio/pluck');
+const { HotMesh } = require('@hotmeshio/hotmesh');
 const Redis = require('redis');
 const redisConfig = {
   class: Redis,

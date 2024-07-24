@@ -1,9 +1,9 @@
-//USAGE            `npm run demo:ts:pluck cat dog mouse`        ///////
+//USAGE            `npm run demo:ts:meshdata cat dog mouse`        ///////
 
-console.log('\n* initializing pluck demo ...\n');
+console.log('\n* initializing meshdata demo ...\n');
 
 import 'dotenv/config';
-import { HotMeshTypes, Pluck } from '@hotmeshio/pluck';
+import { Types, MeshData } from '@hotmeshio/hotmesh';
 import * as Redis from 'redis';
 import { setupTelemetry } from '../../../telemetry/index';
 
@@ -22,10 +22,10 @@ setupTelemetry();
       },
       index: 'greeting',    //the index name in Redis is 'greeting'
       prefix: ['greeting'], //only index documents with keys that begin with 'greeting'
-    } as unknown as HotMeshTypes.WorkflowSearchOptions;
+    } as unknown as Types.WorkflowSearchOptions;
 
-    //2) Initialize Pluck and Redis
-    const pluck = new Pluck(
+    //2) Initialize MeshData and Redis
+    const meshData = new MeshData(
       Redis,
       { url: 'redis://:key_admin@redis:6379' },
       schema,
@@ -33,17 +33,17 @@ setupTelemetry();
 
     //3) Connect a 'greeting' worker function
     console.log('\n* connecting workers ...\n');
-    await pluck.connect({
+    await meshData.connect({
       entity: 'greeting',
       target: async function(userID: string): Promise<string> {
 
-        const search = await Pluck.workflow.search();
+        const search = await MeshData.workflow.search();
         await search.set('active', 'yes');
 
         //simulate a database call
         return `Welcome, ${userID}.`;
       },
-      options: { namespace: 'pluck' },
+      options: { namespace: 'meshdata' },
     });
 
     // Loop; call the 'greeting' worker for each user
@@ -51,7 +51,7 @@ setupTelemetry();
     for (const userID of userIDs) {
 
       //4) Call the 'greeting' worker function; include search data
-      const response = await pluck.exec({
+      const response = await meshData.exec({
         entity: 'greeting',
         args: [userID],
         options: {
@@ -60,17 +60,17 @@ setupTelemetry();
           search: {
             data: { id: userID, plan: 'pro' }
           },
-          namespace: 'pluck', //redis app name (default is 'durable')
+          namespace: 'meshdata', //redis app name (default is 'meshflow')
         },
       });
 
       //5) Read data (by field name) directly from Redis
-      const data = await pluck.get(
+      const data = await meshData.get(
         'greeting',
         userID,
         { 
           fields: ['plan', 'id', 'active'],
-          namespace: 'pluck'
+          namespace: 'meshdata'
         },
       );
 
@@ -79,18 +79,18 @@ setupTelemetry();
 
     //6) Create a search index
     console.log('\n\n* creating search index ...');
-    await pluck.createSearchIndex('greeting', { namespace: 'pluck' }, schema);
+    await meshData.createSearchIndex('greeting', { namespace: 'meshdata' }, schema);
 
     //7) Full Text Search for records
-    const results = await pluck.findWhere('greeting', {
+    const results = await meshData.findWhere('greeting', {
       query: [{ field: 'id', is: '=', value: userIDs[userIDs.length - 1] }],
       limit: { start: 0, size: 100 },
       return: ['plan', 'id', 'active']
     });
     console.log(`\n\n* matching message (${userIDs[userIDs.length - 1]}) ...\n`, results, '\n');
 
-    //8) Shutdown Pluck
-    await Pluck.shutdown();
+    //8) Shutdown MeshData
+    await MeshData.shutdown();
 
     console.log('\n* shutting down...press ctrl+c to exit early\n');
   } catch (e) {

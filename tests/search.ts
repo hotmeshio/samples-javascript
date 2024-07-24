@@ -1,4 +1,4 @@
-import { Pluck } from '@hotmeshio/pluck';
+import { MeshData } from '@hotmeshio/hotmesh';
 
 type TestType = {
   userId: string;
@@ -15,7 +15,7 @@ const doOnce = async (...args: any[]) => {
 
 const create = async ({ userId, planId, plan, cycle, timestamp, memo }: TestType): Promise<string> => {
   //persist the billing plan details (test impact of search on DB throughput and size)
-  const search = await Pluck.workflow.search();
+  const search = await MeshData.workflow.search();
   await search.set(
     '$entity', 'test',
     'userId', userId.toString(),
@@ -28,7 +28,7 @@ const create = async ({ userId, planId, plan, cycle, timestamp, memo }: TestType
 
   //call a function (it will be called once and only once)
   //NOTE: this test can be modified to call `proxyActivities` instead
-  Pluck.workflow.once(doOnce, userId, planId, plan, cycle, timestamp);
+  MeshData.workflow.once(doOnce, userId, planId, plan, cycle, timestamp);
   return timestamp;
 };
 

@@ -1,4 +1,4 @@
-import { Pluck } from '@hotmeshio/pluck';
+import { MeshData } from '@hotmeshio/hotmesh';
 
 type TestArgs = {
   id: string;
@@ -23,7 +23,7 @@ type TestArgs = {
  */
 const startTest = async ({ id, type, timestamp, width, depth, wait, memo = '' }: TestArgs): Promise<number> => {
   //add some data to the workflow record
-  const search = await Pluck.workflow.search();
+  const search = await MeshData.workflow.search();
   await search.set(
     '$entity', 'test',
     'id', id,
@@ -40,7 +40,7 @@ const startTest = async ({ id, type, timestamp, width, depth, wait, memo = '' }:
     const childWorkflows: Promise<number>[] = [];
     for (let i = 0; i < width; i++) {
       childWorkflows.push(
-        Pluck.workflow.execChild<number>({
+        MeshData.workflow.execChild<number>({
           args: [{ id, type, timestamp, width, depth: depth - 1, wait, memo } as TestArgs],
           taskQueue: 'v1',
           workflowName: 'test',
@@ -53,7 +53,7 @@ const startTest = async ({ id, type, timestamp, width, depth, wait, memo = '' }:
 
   //set the duration in ms and return
   const duration = Date.now() - timestamp;
-  const durationSearch = await Pluck.workflow.search();
+  const durationSearch = await MeshData.workflow.search();
   await durationSearch.incr('duration', duration);
   return duration;
 }

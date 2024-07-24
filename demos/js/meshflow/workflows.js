@@ -1,7 +1,7 @@
-const { Durable } = require('@hotmeshio/pluck');
+const { MeshFlow } = require('@hotmeshio/hotmesh');
 const activities = require('./activities');
 
-const { greet, saludar } = Durable.workflow.proxyActivities({
+const { greet, saludar } = MeshFlow.workflow.proxyActivities({
   activities,
   retryPolicy: {
     maximumAttempts: 1_000, //I hope not!
@@ -12,7 +12,7 @@ const { greet, saludar } = Durable.workflow.proxyActivities({
 
 async function example(name, lang) {
   //sleep to showcase replay/reentrance
-  await Durable.workflow.sleepFor('1 second');
+  await MeshFlow.workflow.sleepFor('1 second');
 
   //execute a proxied activity
   if (lang === 'es') {
