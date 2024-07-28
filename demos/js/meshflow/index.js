@@ -1,10 +1,14 @@
-//USAGE            `npm run demo:js:meshflow`        ///////
+//USAGE            `DEMO_DB=valkey npm run demo:js:meshflow`
+//                 `DEMO_DB=dragonfly npm run demo:js:meshflow`
+//                 `npm run demo:js:meshflow` //default is redis
 
 console.log('initializing meshflow demo ...\n');
 
 const { MeshFlow, HotMesh } = require('@hotmeshio/hotmesh');
-const Redis = require('redis');
+const { getRedisConfig } = require('../config');
 const workflows = require('./workflows');
+const { setupTelemetry } = require('../tracer');
+setupTelemetry();
 
 (async () => {
   try {
@@ -13,10 +17,7 @@ const workflows = require('./workflows');
     //   The worker will stay open, listening to its
     //   task queue until MeshFlow.shutdown is called.
     await MeshFlow.Worker.create({
-      connection: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' }
-      },
+      connection: getRedisConfig(),
       taskQueue: 'default',
       namespace: 'meshflow',
       workflow: workflows.example,
@@ -31,19 +32,23 @@ const workflows = require('./workflows');
     //2) initialize the client; this is typically done in
     //   another file, but is done here for convenience
     const client = new MeshFlow.Client({
-      connection: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' }
-      }
+      connection: getRedisConfig(),
     });
 
     //3) start a new workflow
     const handle = await client.workflow.start({
-      args: ['HotMesh', 'es'],
+      namespace: 'meshflow', //the app name in Redis
       taskQueue: 'default',
       workflowName: 'example',
-      workflowId: HotMesh.guid(),
-      namespace: 'meshflow', //the app name in Redis
+      workflowId: `default-${HotMesh.guid()}`,
+      args: ['HotMesh', 'es'],
+      expire: 3_600,
+      search: {
+        data: {
+          a: 'hello',
+          b: 'world',
+        },
+      },
     });
 
     //4) subscribe to the eventual result; if a random

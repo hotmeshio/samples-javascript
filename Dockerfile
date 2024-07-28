@@ -1,21 +1,37 @@
-# Start from the Node 19.8.1-alpine base image
-FROM node:19.8.1-alpine AS base
+FROM --platform=linux/amd64 node:20-bullseye-slim AS base
+RUN npm install -g npm@10.5.1
 
-# Set the working directory in the container
-WORKDIR /app
+EXPOSE 3010
+ENTRYPOINT ["/tini", "--"]
 
-# Copy package.json and package-lock.json to the container
-COPY package*.json ./
+RUN apt-get update -y && apt-get install -y curl
 
-# Install the dependencies
+# Add Tini
+# Docker has the --init flag now but figured this is more portable for now since it init is platform specific 
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+
+USER node
+WORKDIR /home/node/app
+
+FROM base AS development
+ENV NODE_ENV=development
+COPY --chown=node:node package*.json ./
 RUN npm install
-
-# Copy the rest of the application code into the container
 COPY . .
+# Use root in dev for installing packages/debugging
+USER root
+CMD ["npm", "run", "server"]
 
-# Expose port 3000
-EXPOSE 3000
+FROM development AS build
+RUN npm run build
 
-# Command to run the application
-CMD ["tail", "-f", "/dev/null"]
+FROM base AS production
+ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm ci
 
+COPY app/build ./app/build
+COPY --from=build /home/node/app/build/ .
+CMD ["node", "web/server.js"]

@@ -1,13 +1,14 @@
-//USAGE            `npm run demo:ts:meshflow`        ///////
+//USAGE            `DEMO_DB=valkey npm run demo:ts:meshflow`
+//                 `DEMO_DB=dragonfly npm run demo:ts:meshflow`
+//                 `npm run demo:ts:meshflow` //default is redis
 
 console.log('initializing meshflow demo ...\n');
 
 import 'dotenv/config';
 import { MeshFlow, HotMesh } from '@hotmeshio/hotmesh';
-import * as Redis from 'redis';
+import { getRedisConfig } from '../config';
 import * as workflows from './workflows';
-import { setupTelemetry } from '../../../telemetry/index';
-
+import { setupTelemetry } from '../../../telemetry';
 setupTelemetry();
 
 (async () => {
@@ -17,10 +18,7 @@ setupTelemetry();
     //   The worker will stay open, listening to its
     //   task queue until MeshFlow.shutdown is called.
     await MeshFlow.Worker.create({
-      connection: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' }
-      },
+      connection: getRedisConfig(),
       taskQueue: 'default',
       namespace: 'meshflow',
       workflow: workflows.example,
@@ -35,19 +33,23 @@ setupTelemetry();
     //2) initialize the client; this is typically done in
     //   another file, but is done here for convenience
     const client = new MeshFlow.Client({
-      connection: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' }
-      }
+      connection: getRedisConfig()
     });
 
     //3) start a new workflow
     const handle = await client.workflow.start({
-      args: ['HotMesh', 'es'],
+      namespace: 'meshflow', //the app name in Redis
       taskQueue: 'default',
       workflowName: 'example',
-      workflowId: HotMesh.guid(),
-      namespace: 'meshflow', //the app name in Redis
+      workflowId: `default-${HotMesh.guid()}`,
+      args: ['HotMesh', 'es'],
+      expire: 3_600,
+      search: {
+        data: {
+          a: 'hello',
+          b: 'world',
+        },
+      },
     });
 
     //4) subscribe to the eventual result; if a random

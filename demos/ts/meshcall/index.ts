@@ -1,13 +1,14 @@
-//USAGE            `npm run demo:ts:meshcall cat dog mouse`        ///////
+//USAGE            `DEMO_DB=valkey npm run demo:ts:meshcall`
+//                 `DEMO_DB=dragonfly npm run demo:ts:meshcall`
+//                 `npm run demo:ts:meshcall` //default is redis
 
 console.log('\n* initializing meshcall demo ...\n');
 
 
 import 'dotenv/config';
 import { MeshCall } from '@hotmeshio/hotmesh';
-import * as Redis from 'redis';
-import { setupTelemetry } from '../../../telemetry/index';
-
+import { getRedisConfig } from '../config';
+import { setupTelemetry } from '../../../telemetry';
 setupTelemetry();
 
 (async () => {
@@ -17,10 +18,7 @@ setupTelemetry();
     await MeshCall.connect({
       namespace: 'meshcall',
       topic: 'my.function',
-      redis: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' },
-      },
+      redis: getRedisConfig(),
       callback: async function(userID: string): Promise<string> {
         //do stuff...
         console.log('callback was called >', userID);
@@ -34,10 +32,7 @@ setupTelemetry();
       namespace: 'meshcall',
       topic: 'my.function',
       args: ['CoolMesh'],
-      redis: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' },
-      },
+      redis: getRedisConfig(),
     });
     console.log('\n* worker response >', response);
 
@@ -47,10 +42,7 @@ setupTelemetry();
       namespace: 'meshcall',
       topic: 'my.function',
       id: 'mycached123',
-      redis: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' },
-      },
+      redis: getRedisConfig(),
       options: { id: 'mycached123' }, //this format also works
     });
 
@@ -63,10 +55,8 @@ setupTelemetry();
         namespace: 'meshcall',
         topic: 'my.function',
         args: ['CachedMesh'],
-        redis: {
-          class: Redis,
-          options: { url: 'redis://:key_admin@redis:6379' },
-        },
+        redis: getRedisConfig(),
+        //use `default` as the prefix, so the job is easy to locate (HSCAN default-*)
         options: { id: 'mycached123', ttl: '1 day' },
       });
       console.log('* cached response for 1 day>', cached);

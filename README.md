@@ -2,37 +2,44 @@
 
 This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow.
 
+The repo also include a Dashboard Web App which surfaces all engines, workers, and workflows. The Web App also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
+
 If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *MeshFlow* module will be easiest to understand, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *MeshData*.
 
 ## Table of Contents
-
-1. [HotMesh](#hotmesh)
+1. [Quickstart](#quickstart)
+   - [Requirements](#requirements)
+   - [Get started](#get-started)
+   - [HotMesh Dashboard](#hotmesh-dashboard)
+   - [JavaScript Lifecycle Demos](#javascript-lifecycle-demos)
+   - [TypeScript Lifecycle Demos](#typescript-lifecycle-demos)
+2. [HotMesh](#hotmesh)
    - [Distributed Orchestration](#distributed-orchestration)
    - [Control Without a Controller](#control-without-a-controller)
    - [Model-driven Development](#model-driven-development)
-2. [MeshCall](#meshcall)
+3. [MeshCall](#meshcall)
    - [Connect Everything](#connect-everything)
    - [Link the Cron Function](#link-the-cron-function)
    - [Run the Cron Function](#run-the-cron-function)
-2. [MeshFlow](#meshflow)
+4. [MeshFlow](#meshflow)
    - [Transactional Workflow](#transactional-workflow)
    - [Activities](#activities)
    - [Workflows](#workflows)
    - [Client](#client)
    - [Worker](#worker)
-3. [MeshData](#meshdata)
+5. [MeshData](#meshdata)
    - [Transactional Analytics](#transactional-analytics)
    - [Ad hoc Operational Networks](#ad-hoc-operational-networks)
    - [Connect](#connect)
    - [Execute](#execute)
    - [Execute and Cache](#execute-and-cache)
    - [Execute and Operationalize](#execute-and-operationalize)
-5. [Run the Demos](#run-the-demos)
+6. [Run the Demos](#run-the-demos)
    - [JavaScript Examples](#javascript-examples)
    - [TypeScript Examples](#typescript-examples)
-6. [Visualize | Open Telemetry](#visualize--opentelemetry)
-6. [Visualize | Redis Insight](#visualize--redisinsight)
-6. [Visualize | HotMesh Dashboard](#visualize--hotmesh-dashboard)
+7. [Visualize | Open Telemetry](#visualize--opentelemetry)
+8. [Visualize | Redis Insight](#visualize--redisinsight)
+9. [Visualize | HotMesh Dashboard](#visualize--hotmesh-dashboard)
 
 ## Quickstart
 
@@ -46,22 +53,27 @@ If you'd like to know more about *HotMesh* in general, refer to the section on D
 - `npm run docker:reset-redis` - Reset Redis [reset database]
 - `npm run docker:logs:redis` - View Redis logs
 
-HotMesh works with any Redis-like backend, including ValKey and Dragonfly. A Docker Compose file has been included for each. If you wish to run the demos using a specific backend, use one of the following variants:
+HotMesh works with any Redis-like backend. ValKey and DragonflyDB are loaded alongside the Redis instance. External Port mappings are as follows.
 
-- `npm run docker:reset-redis` - Reset Redis [reset and use Redis]
-- `npm run docker:reset-redis:valkey` - Reset ValKey [reset and use ValKey]
-- `npm run docker:reset-redis:dragonfly` - Reset Dragonfly [reset and use Dragonfly]
+- `6399` - Redis
+- `6398` - ValKey
+- `6397` - DragonflyDB
 
->All demos will work with all DB variants except for the MeshData demo which uses the Redis `FT.SEARCH` module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using `FT.SEARCH` commands. 
+>All demos will work with all DB variants except for the MeshData demo which uses the Redis `FT.SEARCH` module (unsupported in ValKey). The demo will still successfully execute workflows, but it will not be searchable using `FT.SEARCH` commands.
 
-### JavaScript
+### HotMesh Dashboard
+The Dashboard Web App is available at `http://localhost:3010`. It provides a visual representation of the network, including the number of engines, workers, and workflows. It also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
+
+An LLM is also included to simplify querying and analyzing workflow data for those deployments that include the Redis `FT.SEARCH` module.
+
+### JavaScript Lifecycle Demos
 Run from outside the Docker container.
 - `npm run docker:demo:js:hotmesh howdy` - Run the *HotMesh* lifecycle example (JavaScript)
 - `npm run docker:demo:js:meshcall` - Run the *MeshCall* lifecycle example (JavaScript)
 - `npm run docker:demo:js:meshflow` - Run the *MeshFlow* lifecycle example (JavaScript)
 - `npm run docker:demo:js:meshdata cat dog mouse` - Run the *MeshData* lifecycle example (JavaScript)
 
-### TypeScript
+### TypeScript Lifecycle Demos
 Run from outside the Docker container.
 - `npm run docker:demo:ts:hotmesh howdy` - Run the *HotMesh* lifecycle example (TypeScript)
 - `npm run docker:demo:ts:meshcall` - Run the *MeshCall* lifecycle example (TypeScript)
@@ -156,7 +168,7 @@ const response = await hotMesh.pubsub('myfirstapp.test', {});
 ## MeshCall
 
 ### Connect Everything
-The [MeshCall](https://hotmeshio.github.io/sdk-typescript/classes/services_meshcall.MeshCall.html) module connects any function with a connection to Redis. Function responses are cacheable and functions can even run as idempotent cron jobs. Make blazing fast interservice calls that return in milliseconds without the overhead of HTTP.
+[MeshCall](https://hotmeshio.github.io/sdk-typescript/classes/services_meshcall.MeshCall.html) connects your functions to the Redis-backed mesh, exposing them as idempotent endpoints. Function responses are cacheable and functions can even run as idempotent cron jobs. Make blazing fast interservice calls that return in milliseconds without the overhead of HTTP.
 
 ### Link the Cron Function
 This example demonstrates an *idempotent* cron that runs every day. The `id` makes each cron job unique and ensures that only one instance runs, despite repeated invocations.

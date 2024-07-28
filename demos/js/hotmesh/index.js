@@ -1,15 +1,13 @@
-//USAGE            `npm run demo:js:hotmesh howdy`        ///////
+//USAGE            `DEMO_DB=dragonfly npm run demo:js:hotmesh howdy`
+//                 `DEMO_DB=valkey npm run demo:js:hotmesh hi`
+//                 `npm run demo:js:hotmesh` //default is hello
 
 console.log('initializing hotmesh demo ...\n');
 
 const { HotMesh } = require('@hotmeshio/hotmesh');
-const Redis = require('redis');
-const redisConfig = {
-  class: Redis,
-  options: {
-    url: 'redis://:key_admin@redis:6379'
-  }
-};
+const { getRedisConfig } = require('../config');
+const { setupTelemetry } = require('../tracer');
+setupTelemetry();
 
 (async () => {
 
@@ -18,13 +16,13 @@ const redisConfig = {
     appId: 'hotmesh',
     logLevel: process.env.HMSH_LOG_LEVEL || 'debug',
     engine: {
-      redis: redisConfig,
+      redis: getRedisConfig(),
     },
 
     workers: [
       { 
         topic: 'work.do',
-        redis: redisConfig,
+        redis: getRedisConfig(),
         callback: async function (data) {
           return {
             metadata: { ...data.metadata },
@@ -41,6 +39,8 @@ const redisConfig = {
   version: '1'
   graphs:
     - subscribes: hotmesh.test
+
+      expire: 3600
 
       input:
         schema:

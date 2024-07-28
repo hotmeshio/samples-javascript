@@ -1,0 +1,102 @@
+{
+	"info": {
+		"_postman_id": "d8f9bc09-e262-4ba5-9355-7749fe93e7a8",
+		"name": "Test Entity API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "11451556"
+	},
+	"item": [
+		{
+			"name": "/v1/tests [execChild]",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"ok\",\n    \"width\": 1,\n    \"depth\": 3,\n    \"wait\": true,\n    \"memo\": \"hi\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3010/api/v1/tests?database=redis&namespace=sandbox",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"api",
+						"v1",
+						"tests"
+					],
+					"query": [
+						{
+							"key": "database",
+							"value": "redis"
+						},
+						{
+							"key": "namespace",
+							"value": "sandbox"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/tests [proxyActivities]",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"batch\",\n    \"width\": 3,\n    \"depth\": 3,\n    \"wait\": true,\n    \"memo\": \"hi\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3010/api/v1/tests?database=redis&namespace=sandbox",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"api",
+						"v1",
+						"tests"
+					],
+					"query": [
+						{
+							"key": "database",
+							"value": "redis"
+						},
+						{
+							"key": "namespace",
+							"value": "sandbox"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"info": {
+		"_postman_id": "90a51458-6a1e-4013-9f17-6f8bd06a184d",
+		"name": "Bill Entity API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "11451556"
+	},
+	"item": [
+		{
+			"name": "/v1/bills",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"query\": [\n        { \"field\": \"plan\", \"is\": \"=\", \"value\": \"developer\" }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3010/api/v1/bills?database=redis&namespace=sandbox",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"api",
+						"v1",
+						"bills"
+					],
+					"query": [
+						{
+							"key": "database",
+							"value": "redis"
+						},
+						{
+							"key": "namespace",
+							"value": "sandbox"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
