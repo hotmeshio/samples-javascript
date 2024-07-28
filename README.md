@@ -2,7 +2,7 @@
 
 This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow.
 
-The repo also include a Dashboard Web App which surfaces all engines, workers, and workflows. The Web App also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
+The repo also includes a *Dashboard Web App* which surfaces all engines, workers, and workflows. The Web App also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
 
 If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *MeshFlow* module will be easiest to understand, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *MeshData*.
 
