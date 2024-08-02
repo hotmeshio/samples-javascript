@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { Order } from '../../services/namespaces/routing/order';
-import { findEntity } from '../../services/namespaces/manifest';
+
+import { findEntity } from '../../meshdata/manifest';
+import { Order } from '../../meshdata/namespaces/routing/order';
 
 const router = Router();
 

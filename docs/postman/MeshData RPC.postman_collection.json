@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "41252fde-c4d9-4ae8-8bd9-62cf6ac98d82",
+		"name": "MeshData RPC",
+		"description": "Surfaces the MeshData module SDK as a set of RPC-oriented APIs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "11451556"
+	},
+	"item": [
+		{
+			"name": "/v1/findWhere BILL",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": [\n        \"bill\",\n        {\n          \"return\": [\"id\", \"timestamp\", \"userId\", \"plan\"],\n          \"query\": [\n            { \"field\": \"userId\", \"is\": \"=\", \"value\": \"user\\\\-jen\\\\.doe\" },\n            { \"field\": \"plan\", \"is\": \"=\", \"value\": \"pro\" }\n            ],\n          \"limit\": { \"start\": 0, \"size\": 100 },\n          \"options\": { \"namespace\": \"sandbox\" }\n        }\n    ],\n    \"metadata\": {\n        \"database\": \"redis\",\n        \"namespace\": \"sandbox\",\n        \"entity\": \"bill\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3010/api/v1/meshdata/findWhere"
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/findWhere USER",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": [\n        \"user\",\n        {\n          \"return\": [\"id\", \"first\", \"email\"],\n          \"query\": [\n            { \"field\": \"email\", \"is\": \"=\", \"value\": \"jen\\\\.doe\\\\@hotmesh\\\\.com\" }\n            ],\n          \"limit\": { \"start\": 0, \"size\": 100 },\n          \"options\": { \"namespace\": \"sandbox\" }\n        }\n    ],\n    \"metadata\": {\n        \"database\": \"redis\",\n        \"namespace\": \"sandbox\",\n        \"entity\": \"user\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3010/api/v1/meshdata/findWhere"
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/export USER",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": [\n        \"user\",\n        \"jen.doe\",\n        {},\n        \"sandbox\"\n    ],\n    \"metadata\": {\n        \"database\": \"redis\",\n        \"namespace\": \"sandbox\",\n        \"entity\": \"user\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3010/api/v1/meshdata/export"
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/info USER",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": [\"user\", \"jen.doe\", { \"namespace\": \"sandbox\" }],\n    \"metadata\": {\n        \"database\": \"redis\",\n        \"namespace\": \"sandbox\",\n        \"entity\": \"user\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3010/api/v1/meshdata/info"
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/rollCall ALL",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"metadata\": {\n        \"database\": \"redis\",\n        \"namespace\": \"sandbox\",\n        \"entity\": \"user\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3010/api/v1/meshdata/rollCall"
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/throttle",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": [\n        {\n          \"throttle\": 60000,\n          \"topic\": \"v1-user\",\n          \"namespace\": \"sandbox\"\n        }\n    ],\n    \"metadata\": {\n        \"database\": \"redis\",\n        \"namespace\": \"sandbox\",\n        \"entity\": \"user\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3010/api/v1/meshdata/throttle"
+			},
+			"response": []
+		}
+	]
+}

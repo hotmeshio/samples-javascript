@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { Types } from '@hotmeshio/hotmesh';
 
-import { GPT } from '../../services/ai/gpt'
-import { findEntity, toJSON } from '../../services/namespaces/manifest';
+import { findEntity, toJSON } from '../../meshdata/manifest';
+import { GPT } from '../../modules/gpt';
+
 const router = Router();
 
 /**
@@ -11,7 +12,11 @@ const router = Router();
  */
 const getDashboardManifest = async (_: Request, res: Response) => {
   try {
-    res.status(200).send({ manifest: toJSON() });
+    res.status(200).send({
+      manifest: toJSON(),
+      honeycomb_service_name: process.env.HONEYCOMB_SERVICE_NAME,
+      honeycomb_environment: process.env.HONEYCOMB_ENVIRONMENT,
+    });
   } catch (err) {
     res.status(500).send({ error: err.message });
   }

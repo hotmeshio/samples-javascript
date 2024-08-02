@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { Bill } from '../../services/namespaces/sandbox/bill';
-import { findEntity } from '../../services/namespaces/manifest';
+
+import { findEntity } from '../../meshdata/manifest';
+import { Bill } from '../../meshdata/namespaces/sandbox/bill';
 
 const router = Router();
 

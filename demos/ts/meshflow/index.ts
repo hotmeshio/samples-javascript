@@ -6,9 +6,10 @@ console.log('initializing meshflow demo ...\n');
 
 import 'dotenv/config';
 import { MeshFlow, HotMesh } from '@hotmeshio/hotmesh';
-import { getRedisConfig } from '../config';
+import { getRedisConfig } from '../../../meshdata/config';
+import { getTraceUrl, setupTelemetry, shutdownTelemetry } from '../../../modules/tracer';
 import * as workflows from './workflows';
-import { setupTelemetry } from '../../../telemetry';
+
 setupTelemetry();
 
 (async () => {
@@ -37,30 +38,31 @@ setupTelemetry();
     });
 
     //3) start a new workflow
+    const workflowId = `default-${HotMesh.guid()}`;
     const handle = await client.workflow.start({
       namespace: 'meshflow', //the app name in Redis
       taskQueue: 'default',
       workflowName: 'example',
-      workflowId: `default-${HotMesh.guid()}`,
+      workflowId,
       args: ['HotMesh', 'es'],
       expire: 3_600,
       search: {
         data: {
-          a: 'hello',
-          b: 'world',
+          $entity: 'default',
+          id: workflowId,
         },
       },
     });
 
-    //4) subscribe to the eventual result; if a random
-    //   error is encountered, the system will retry in 5s
+    //4) subscribe to the eventual result
     console.log('\nRESPONSE', await handle.result(), '\n');
-    //logs '¡Hola, HotMesh!'
+    const jobState = await handle.state(true);
 
-    //5) Shutdown (typically on sigint)
+    //5) Shutdown (typically on sigint/sigterm)
     await MeshFlow.shutdown();
+    await shutdownTelemetry();
+    console.log('\n\nTELEMETRY', getTraceUrl(jobState.metadata.trc), '\n');
 
-    // Exit the process
     process.exit(0);
   } catch (error) {
     console.error('An error occurred:', error);

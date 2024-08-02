@@ -6,8 +6,8 @@ console.log('\n* initializing meshdata demo ...\n');
 
 import 'dotenv/config';
 import { Types, MeshData } from '@hotmeshio/hotmesh';
-import { getRedisConfig } from '../config';
-import { setupTelemetry } from '../../../telemetry';
+import { getRedisConfig } from '../../../meshdata/config';
+import { getTraceUrl, setupTelemetry, shutdownTelemetry } from '../../../modules/tracer';
 setupTelemetry();
 
 const redisConfig = getRedisConfig();
@@ -99,11 +99,13 @@ const redisConfig = getRedisConfig();
       });
       console.log(`\n\n* matching message (${inputArgs[inputArgs.length - 1]}) ...\n`, results, '\n');
     }
+    const jobState = await meshData.info('default', inputArgs[0], { namespace: 'meshdata' });
 
-    //8) Shutdown MeshData
+    //8) Shutdown
     await MeshData.shutdown();
+    await shutdownTelemetry();
+    console.log('\n\nTELEMETRY', getTraceUrl(jobState.metadata.trc), '\n');
 
-    console.log('\n* shutting down...press ctrl+c to exit early\n');
     process.exit(0);
   } catch (e) {
     console.error(e);

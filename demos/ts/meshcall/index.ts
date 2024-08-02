@@ -7,8 +7,8 @@ console.log('\n* initializing meshcall demo ...\n');
 
 import 'dotenv/config';
 import { MeshCall } from '@hotmeshio/hotmesh';
-import { getRedisConfig } from '../config';
-import { setupTelemetry } from '../../../telemetry';
+import { getTraceUrl, setupTelemetry, shutdownTelemetry } from '../../../modules/tracer';
+import { getRedisConfig } from '../../../meshdata/config';
 setupTelemetry();
 
 (async () => {
@@ -59,13 +59,18 @@ setupTelemetry();
         //use `default` as the prefix, so the job is easy to locate (HSCAN default-*)
         options: { id: 'mycached123', ttl: '1 day' },
       });
-      console.log('* cached response for 1 day>', cached);
+      console.log('* cached response for 1 day >', cached);
     }
 
-    //4) Shutdown MeshCall
-    await MeshCall.shutdown();
+    //4) Get the trace URL
+    const hotMesh = await MeshCall.getInstance('meshcall', getRedisConfig());
+    const jobState = await hotMesh.getState('meshcall.call', 'mycached123');
 
-    console.log('\n* shutting down...\n');
+    //5) Shutdown
+    await MeshCall.shutdown();
+    await shutdownTelemetry();
+    console.log('\n\nTELEMETRY', getTraceUrl(jobState.metadata.trc), '\n');
+
     process.exit(0);
   } catch (e) {
     console.error(e);

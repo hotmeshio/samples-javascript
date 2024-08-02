@@ -1,7 +1,8 @@
 import { Router } from 'express';
+
 import { Socket } from '../utils/socket';
-import { User } from '../../services/namespaces/sandbox/user';
-import { findEntity } from '../../services/namespaces/manifest';
+import { findEntity } from '../../meshdata/manifest';
+import { User } from '../../meshdata/namespaces/sandbox/user';
 
 const router = Router();
 

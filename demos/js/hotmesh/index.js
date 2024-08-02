@@ -4,9 +4,11 @@
 
 console.log('initializing hotmesh demo ...\n');
 
+require('dotenv').config();
 const { HotMesh } = require('@hotmeshio/hotmesh');
 const { getRedisConfig } = require('../config');
-const { setupTelemetry } = require('../tracer');
+const { setupTelemetry, shutdownTelemetry, getTraceUrl } = require('../tracer');
+
 setupTelemetry();
 
 (async () => {
@@ -23,10 +25,10 @@ setupTelemetry();
       { 
         topic: 'work.do',
         redis: getRedisConfig(),
-        callback: async function (data) {
+        callback: async function (payload) {
           return {
-            metadata: { ...data.metadata },
-            data: { y: `${data?.data?.x} world` }
+            metadata: { ...payload.metadata },
+            data: { workerOutput: `${payload?.data?.workerInput} world` }
           };
         }
       }
@@ -46,56 +48,56 @@ setupTelemetry();
         schema:
           type: object
           properties:
-            a:
+            input:
               type: string
 
       output:
         schema:
           type: object
           properties:
-            b:
+            output:
               type: string
 
       activities:
-        t1:
+        trigger1:
           type: trigger
-        a1:
+        worker1:
           type: worker
           topic: work.do
           input:
             schema:
               type: object
               properties:
-                x:
+                workerInput:
                   type: string
             maps:
-              x: '{t1.output.data.a}'
+              workerInput: '{trigger1.output.data.input}'
           output:
             schema:
               type: object
               properties:
-                y:
+                workerOutput:
                   type: string
           job:
             maps:
-              b: '{$self.output.data.y}'
+              output: '{$self.output.data.workerOutput}'
       transitions:
-        t1:
-          - to: a1`);
+        trigger1:
+          - to: worker1`);
 
-  //4) re/activate the app across the quorum (happens simultaneously network wide)
+  //4) activate the app (happens simultaneously network wide)
   await hotMesh.activate('1');
 
-  //5) run a test
+  //5) run input test
   const [greeting, ..._rest] = process.argv.slice(2);
-  const response = await hotMesh.pubsub('hotmesh.test', { a : greeting ?? 'hello' });
-  console.log('\nRESPONSE', response.data.b, '\n');
-  // returns: `hello world` (or echoes custom greeting)
+  const response = await hotMesh.pubsub('hotmesh.test', { input : greeting ?? 'hello' });
+  console.log('\nRESPONSE', response.data.output, '\n');
 
-  //6) Shutdown HotMesh
+  //6) Shutdown
   hotMesh.stop();
   await HotMesh.stop();
+  await shutdownTelemetry();
+  console.log('\n\nTELEMETRY', getTraceUrl(response.metadata.trc), '\n');
 
-  // Exit the process
   process.exit(0);
 })();

@@ -1,13 +1,12 @@
 import { Types } from '@hotmeshio/hotmesh';
 
-import { Bill } from '../services/namespaces/sandbox/bill';
-import { Test } from '../services/namespaces/sandbox/test';
-import { User } from '../services/namespaces/sandbox/user';
-import { Order as BillingOrder } from '../services/namespaces/billing/order';
-import { Order as RoutingOrder } from '../services/namespaces/routing/order';
-import { Order as SandboxOrder } from '../services/namespaces/sandbox/order';
-import { Inventory } from '../services/namespaces/inventory';
-import { DefaultEntity } from '../services/namespaces/default';
+import { Bill } from '../meshdata/namespaces/sandbox/bill';
+import { Test } from '../meshdata/namespaces/sandbox/test';
+import { User } from '../meshdata/namespaces/sandbox/user';
+import { Order as BillingOrder } from '../meshdata/namespaces/billing/order';
+import { Order as RoutingOrder } from '../meshdata/namespaces/routing/order';
+import { Inventory } from '../meshdata/namespaces/inventory';
+import { DefaultEntity } from '../meshdata/namespaces/default';
 
 export type DBConfig = {
   REDIS_DATABASE: number,
@@ -25,8 +24,8 @@ export type DB = {
   config: DBConfig,
 };
 
-export type EntityClassTypes = typeof BillingOrder | typeof RoutingOrder | typeof SandboxOrder | typeof Inventory | typeof User | typeof Bill | typeof Test | typeof DefaultEntity;
-export type EntityInstanceTypes = BillingOrder | RoutingOrder | SandboxOrder | Inventory | User | Bill | Test;
+export type EntityClassTypes = typeof BillingOrder | typeof RoutingOrder | typeof Inventory | typeof User | typeof Bill | typeof Test | typeof DefaultEntity;
+export type EntityInstanceTypes = BillingOrder | RoutingOrder | Inventory | User | Bill | Test;
 
 export type Entity = {
   name: string,

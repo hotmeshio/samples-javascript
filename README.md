@@ -1,10 +1,8 @@
 # HotMesh Samples
 
-This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, so as to reveal the full lifecycle of a HotMesh transactional workflow.
+This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment. The [demos](./demos/) are structured to run like unit tests, and reveal the full lifecycle of a HotMesh transactional workflow.
 
-The repo also includes a *Dashboard Web App* which surfaces all engines, workers, and workflows. The Web App also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
-
-If you'd like to know more about *HotMesh* in general, refer to the section on Distributed Orchestration. If you're a Temporal developer, already versed in durable workflow concepts, the *MeshFlow* module will be easiest to understand, given its adherence to Temporal's TypeScript SDK. And if you're interested in hybrid transactional/analytical (HTAP) solutions, refer to *MeshData*.
+The repo also includes a *Dashboard/WebApp* which surfaces all engines, workers, and workflows. Refer to the [meshdata](./meshdata/) directory for details on the namespaces and entities surfaced in the example dashboard.
 
 ## Table of Contents
 1. [Quickstart](#quickstart)
@@ -71,30 +69,30 @@ Run from outside the Docker container.
 - `npm run docker:demo:js:hotmesh howdy` - Run the *HotMesh* lifecycle example (JavaScript)
 - `npm run docker:demo:js:meshcall` - Run the *MeshCall* lifecycle example (JavaScript)
 - `npm run docker:demo:js:meshflow` - Run the *MeshFlow* lifecycle example (JavaScript)
-- `npm run docker:demo:js:meshdata cat dog mouse` - Run the *MeshData* lifecycle example (JavaScript)
+- `npm run docker:demo:js:meshdata bronze silver gold` - Run the *MeshData* lifecycle example (JavaScript)
 
 ### TypeScript Lifecycle Demos
 Run from outside the Docker container.
 - `npm run docker:demo:ts:hotmesh howdy` - Run the *HotMesh* lifecycle example (TypeScript)
 - `npm run docker:demo:ts:meshcall` - Run the *MeshCall* lifecycle example (TypeScript)
 - `npm run docker:demo:ts:meshflow` - Run the *MeshFlow* lifecycle example (TypeScript)
-- `npm run docker:demo:ts:meshdata cat dog mouse` - Run the *MeshData* lifecycle example (TypeScript)
+- `npm run docker:demo:ts:meshdata bronze silver gold` - Run the *MeshData* lifecycle example (TypeScript)
 
 ## HotMesh
 ### Distributed Orchestration
 [HotMesh](https://hotmeshio.github.io/sdk-typescript/classes/services_hotmesh.HotMesh.html) is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
 
-The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis (or a Redis clone like ValKey) like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
+The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis (or a Redis clone such as ValKey) like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
 
-<img src="./img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
+<img src="./docs/img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
 
 The modeling system is based on a [canonical set](https://zenodo.org/records/12168558) of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
 
-<img src="./img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
+<img src="./docs/img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
 
 Here, for example, is the `worker` activity type. It's reentrant (most activities are), which allows your linked functions to emit in-process messages as they complete a task. The messaging system goes beyond basic request/response and fan-out/fan-in patterns, providing real-time progress updates.
 
-<img src="./img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
+<img src="./docs/img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
 
 >Process orchestration is emergent within HotMesh and occurs naturally as a result of processing stream messages. While the reference implementation targets Redis+TypeScript, any language (Rust, Go, Python, Java) and multimodal database (ValKey, DragonFly, etc) can take advantage of the *sequence engine* design pattern.
 
@@ -180,7 +178,7 @@ The `cron` method fails silently if a workflow is already running with the same 
 import { MeshCall } from '@hotmeshio/hotmesh';
 import * as Redis from 'redis';
 
-export const runMyCron = (id: string, interval = '1 day') => {
+export const startMyCron = (id: string, interval = '1 day') => {
   MeshCall.cron({
     topic: 'my.cron.function',
     redis: {
@@ -196,12 +194,12 @@ export const runMyCron = (id: string, interval = '1 day') => {
 ```
 
 ### Run the Cron Function
-Call `runMyCron` at server startup (or call as needed to run multiple crons).
+Call `startMyCron` at server startup (or call as needed to run multiple crons).
 
 ```javascript
 //server.ts
-import { runMyCron } from './cron';
-runMyCron('myDailyCron123');
+import { startMyCron } from './cron';
+startMyCron('myDailyCron123');
 ```
 
 ## MeshFlow
@@ -211,11 +209,11 @@ HotMesh's [MeshFlow](https://hotmeshio.github.io/sdk-typescript/classes/services
 
 Here is the telemetry output for a HotMesh MeshFlow workflow with a linked worker function. Workflows can be designed with completion times in the tens of milliseconds, taking advantage of distributed stateless execution and a clustered Redis backend.
 
-<img src="./img/cold_start_exec_times.png" alt="HotMesh millisecond-level cold start and execution times" style="max-width:100%;width:800px;">
+<img src="./docs/img/cold_start_exec_times.png" alt="HotMesh millisecond-level cold start and execution times" style="max-width:100%;width:800px;">
 
 The [HotMesh Schema](https://github.com/hotmeshio/sdk-typescript/blob/main/services/meshflow/schemas/factory.ts) used to emulate the Temporal application server is authored in YAML and describes Temporal as a finite state machine. It can be difficult to read through the YAML, so the following visual depiction has been included. Developers familiar with Temporal should see familiar patterns like *reentry*, *collation*, *composition*, *throttling*, etc. Even though the schema is < 100KB, it produces behavioral fidelity indistinguishable from Temporal's physical application server.
 
-<img src="./img/temporal_state_machine.png" alt="Temporal reentrant workflow execution as a finite state machine" style="max-width:100%;width:800px;">
+<img src="./docs/img/temporal_state_machine.png" alt="Temporal reentrant workflow execution as a finite state machine" style="max-width:100%;width:800px;">
 
 The standard set of expected static workflow methods are available for use in your functions: 
 
@@ -402,7 +400,7 @@ For those deployments with the Redis `FT.SEARCH` module enabled, it's possible t
 ### Ad Hoc Operational Networks
 The following is a typical microservices network, with a tangled mess of services and functions. There's important business logic in there (functions *A*, *B* and *C* are critical), but it's hard to find and access.
 
-<img src="./img/operational_data_layer.png" alt="A Tangled Microservices Network with 3 valuable functions buried within" style="max-width:100%;width:600px;">
+<img src="./docs/img/operational_data_layer.png" alt="A Tangled Microservices Network with 3 valuable functions buried within" style="max-width:100%;width:600px;">
 
 MeshData creates an *ad hoc*, Redis-backed network of functions (an "operational data layer"). It's a simple, yet powerful, way to expose and unify your most important functions into a single mesh.
 
@@ -511,14 +509,14 @@ npm run docker:demo:js:meshflow
 ```
 
 #### Run/Demo MeshData (JavaScript)
-This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
+This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: bronze, silver, gold. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'gold' record after all workflows (bronze, silver, and gold) have started.)
 From within the container:
 ```bash
-npm run demo:js:meshdata cat dog mouse
+npm run demo:js:meshdata bronze silver gold
 ```
 From outside the container:
 ```bash
-npm run docker:demo:js:meshdata cat dog mouse
+npm run docker:demo:js:meshdata bronze silver gold
 ```
 
 ### TypeScript Examples
@@ -557,29 +555,29 @@ npm run docker:demo:ts:meshflow
 ```
 
 #### Run/Demo MeshData (TypeScript)
-This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: cat, dog, mouse. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'mouse' record after all workflows (cat, dog, and mouse) have started.)
+This demo runs a few workflows (one for every term you add when starting the test). The app auto-deploys, creates an index, and searches for workflow records based upon terms. The following will create 3 searchable workflows: bronze, silver, gold. The last term entered will be used to drive the FT.SEARCH query. (The following would search for the 'gold' record after all workflows (bronze, silver, and gold) have started.)
 From within the container:
 ```bash
-npm run demo:ts:meshdata cat dog mouse
+npm run demo:ts:meshdata bronze silver gold
 ```
 From outside the container:
 ```bash
-npm run docker:demo:ts:meshdata cat dog mouse
+npm run docker:demo:ts:meshdata bronze silver gold
 ```
 
 ## Visualize | OpenTelemetry
 Add your Honeycomb credentials to `.env`, and view the full *OpenTelemetry* execution tree organized as a DAG.
 
-<img src="./img/opentelemetry.png" alt="Open Telemetry" style="width:600px;max-width:600px;">
+<img src="./docs/img/opentelemetry.png" alt="Open Telemetry" style="width:600px;max-width:600px;">
 
 ## Visualize | RedisInsight
 View commands, streams, data, etc using RedisInsight.
 
-<img src="./img/redisinsight.png" alt="Redis Insight" style="width:600px;max-width:600px;">
+<img src="./docs/img/redisinsight.png" alt="Redis Insight" style="width:600px;max-width:600px;">
 
 ## Visualize | HotMesh Dashboard
 The HotMesh dashboard provides a visual representation of the network, including the number of engines, workers, and workflows. It also provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information.
 
 An LLM is also included to simplify querying and analyzing workflow data for those deployments that include the Redis `FT.SEARCH` module.
 
-<img src="./img/hotmesh_dashboard.png" alt="HotMesh Dashboard" style="width:600px;max-width:600px;">
+<img src="./docs/img/hotmesh_dashboard.png" alt="HotMesh Dashboard" style="width:600px;max-width:600px;">

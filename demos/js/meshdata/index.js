@@ -4,15 +4,19 @@
 
 console.log('\n* initializing meshdata demo ...\n');
 
+require('dotenv').config();
 const { MeshData } = require('@hotmeshio/hotmesh');
 const { getRedisConfig } = require('../config');
+const { setupTelemetry, shutdownTelemetry, getTraceUrl } = require('../tracer');
+
+setupTelemetry();
 
 (async () => {
   const redisConfig = getRedisConfig();
   try {
-    let userIDs = process.argv.slice(2);
-    if (!userIDs.length) {
-      userIDs = ['bronze', 'silver', 'gold'];
+    let inputArgs = process.argv.slice(2);
+    if (!inputArgs.length) {
+      inputArgs = ['bronze', 'silver', 'gold'];
     }
 
     //1) Define a search schema
@@ -38,49 +42,50 @@ const { getRedisConfig } = require('../config');
     console.log('\n* connecting workers ...\n');
     await meshData.connect({
       entity: 'default',
-      target: async function(userID) {
+      target: async function(inputArg) {
 
         const search = await MeshData.workflow.search();
         await search.set('active', 'yes');
 
         //simulate a database call
-        return `Welcome, ${userID}.`;
+        return `Welcome, ${inputArg}.`;
       },
       options: { namespace: 'meshdata' },
     });
 
     // Loop; call the 'default' worker for each user
     console.log('\n\n* inserting messages ...\n');
-    for (const userID of userIDs) {
+    for (const inputArg of inputArgs) {
 
       //4) Call the 'default' worker function; include search data
       const response = await meshData.exec({
         entity: 'default',
-        args: [userID],
+        args: [inputArg],
         options: {
           ttl: '45 minutes',
-          id: userID,
+          id: inputArg,
           search: {
-            data: { id: userID, plan: 'pro' }
+            data: { id: inputArg, plan: 'pro' }
           },
           namespace: 'meshdata', //redis app name (default is 'durable')
+          signalIn: false, //false since demo doesn't showcase 'hooks' and 'signals'
         },
       });
 
       //5) Read data (by field name) directly from Redis
       const data = await meshData.get(
         'default',
-        userID,
+        inputArg,
         { 
           fields: ['plan', 'id', 'active'],
           namespace: 'meshdata'
         },
       );
 
-      console.log(`${userID === userIDs[0] ? '\n' : ''}* UserID: ${userID}, function response =>`, response, 'function state =>', data);
+      console.log(`${inputArg === inputArgs[0] ? '\n' : ''}* UserID: ${inputArg}, function response =>`, response, 'function state =>', data);
     }
 
-    //when testing valkey, elasticache, etc skip search to avoid errors in testing
+    //when testing valkey skip FullTextSearch!
     if (process.env.FTS === 'false') {
       console.log('\n* Full Text Search Unsupported.skipping search index creation and search\n');
     } else {
@@ -90,17 +95,19 @@ const { getRedisConfig } = require('../config');
 
       //7) Full Text Search for records
       const results = await meshData.findWhere('default', {
-        query: [{ field: 'id', is: '=', value: userIDs[userIDs.length - 1] }],
+        query: [{ field: 'id', is: '=', value: inputArgs[inputArgs.length - 1] }],
         limit: { start: 0, size: 100 },
         return: ['plan', 'id', 'active']
       });
-      console.log(`\n\n* matching message (${userIDs[userIDs.length - 1]}) ...\n`, results, '\n');
+      console.log(`\n\n* matching message (${inputArgs[inputArgs.length - 1]}) ...\n`, results, '\n');
     }
+    const jobState = await meshData.info('default', inputArgs[0], { namespace: 'meshdata' });
 
-    //8) Shutdown MeshData
+    //8) Shutdown
     await MeshData.shutdown();
+    await shutdownTelemetry();
+    console.log('\n\nTELEMETRY', getTraceUrl(jobState.metadata.trc), '\n');
 
-    console.log('\n* shutting down...press ctrl+c to exit early\n');
     process.exit(0);
   } catch (e) {
     console.error(e);

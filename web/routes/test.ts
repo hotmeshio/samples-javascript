@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import { findEntity } from '../../meshdata/manifest';
+import { Test } from '../../meshdata/namespaces/sandbox/test';
 import { TestInput } from '../../types/test';
-import { findEntity } from '../../services/namespaces/manifest';
-import { Test } from '../../services/namespaces/sandbox/test';
 
 const router = Router();
 
@@ -35,7 +35,7 @@ router.post('/swarm', async (req, res) => {
     const query = req.query as {database: string, namespace: string};
     const test = findEntity(query.database, query.namespace, 'test') as Test;
     let body = req.body as { type: 'worker' | 'engine', count?: number };
-    res.json(await test.swarm(body.type));
+    res.json(await test.deployPointOfPresence(body.type));
   } catch (err) {
     res.status(500).send({ error: err.message });
   }
@@ -72,21 +72,6 @@ router.delete('/:testId', async (req, res) => {
     const { testId } = req.params;
     await test.delete(testId);
     res.json({ status: 'success' });
-  } catch (err) {
-    res.status(500).send({ error: err.message });
-  }
-});
-
-
-//augments the 'test' object with a transactional hook;
-//shows how to update a "living record"/"active workflow"
-//using a hook
-router.patch('/:testId/transitive', async (req, res) => {
-  try {
-    const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
-    const { testId } = req.params;
-    res.status(200).send(await test.transitive(testId, req.body as { randomId: string }));
   } catch (err) {
     res.status(500).send({ error: err.message });
   }

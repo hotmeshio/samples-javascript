@@ -1,6 +1,6 @@
 {
-  "name": "samples-javascript",
-  "version": "0.2.1",
+  "name": "samples-typescript",
+  "version": "0.2.4",
   "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
     "clean": "rimraf ./build",
@@ -15,6 +15,8 @@
     "demo:ts:meshflow": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 ts-node demos/ts/meshflow/index.ts",
     "demo:ts:meshcall": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=500 ts-node demos/ts/meshcall/index.ts",
     "demo:ts:meshdata": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 ts-node demos/ts/meshdata/index.ts",
+    "cron:start": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 ts-node cron/start.ts",
+    "cron:stop": "NODE_ENV=test HMSH_SCOUT_INTERVAL_SECONDS=2 HMSH_BLOCK_TIME_MS=5000 ts-node cron/stop.ts",
     "docker:demo:js:hotmesh": "docker compose exec hotmesh-dashboard npm run demo:js:hotmesh",
     "docker:demo:js:meshflow": "docker compose exec hotmesh-dashboard npm run demo:js:meshflow",
     "docker:demo:js:meshcall": "docker compose exec hotmesh-dashboard npm run demo:js:meshcall",
@@ -51,7 +53,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@honeycombio/opentelemetry-node": "^0.7.2",
-    "@hotmeshio/hotmesh": "^0.2.1",
+    "@hotmeshio/hotmesh": "^0.2.4",
     "@opentelemetry/auto-instrumentations-node": "^0.47.1",
     "@opentelemetry/sdk-node": "^0.52.1",
     "cors": "^2.8.5",

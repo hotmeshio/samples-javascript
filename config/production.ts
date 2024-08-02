@@ -1,3 +1,1 @@
-export default {
-  USE_REDIS: true,
-};
+export default {};
