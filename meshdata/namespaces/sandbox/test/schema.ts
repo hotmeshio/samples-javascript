@@ -61,5 +61,4 @@ export const schema: Types.WorkflowSearchSchema = {
     examples: ['randomId'],
     indexed: false
   }
-  };
-  
+};

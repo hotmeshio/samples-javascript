@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Types } from '@hotmeshio/hotmesh';
 
-import { findEntity, toJSON } from '../../meshdata/manifest';
+import { findEntity, findSchemas, toJSON } from '../../meshdata/manifest';
 import { GPT } from '../../modules/gpt';
 
 const router = Router();
@@ -29,15 +29,6 @@ router.post('/:method', async (req, res) => {
   const params = req.params as Types.StringAnyType;
   const data = req.body?.data;
 
-  if (params.method === 'ask' && process.env.OPENAI_API_KEY) {
-    try {
-      const response = await GPT.ask(data.messages);
-      return res.status(200).send(response);
-    } catch (e) {
-      return res.status(500).send({ error: e.message });
-    }
-  }
-
   const md = req.body?.metadata;
   const bAwait = md?.await ?? true;
 
@@ -45,9 +36,19 @@ router.post('/:method', async (req, res) => {
     //resolve the target entity class (use namespace if provided)
     const entity = findEntity(md?.database, md?.namespace, md?.entity);
 
-    //now that the target entity class is resolved, call the MeshData method (get, exec, etc)
     const meshDataMethod = entity?.meshData[params.method];
     if (!meshDataMethod) {
+      //the web api surfaces the 'ask' method as it were part
+      // of the MeshData class, but it belongs to the GPT module
+      if (params.method === 'ask' && process.env.OPENAI_API_KEY) {
+        try {
+          const schemas = findSchemas(md?.database, md?.namespace);
+          const response = await GPT.ask(data.messages, schemas);
+          return res.status(200).send(response);
+        } catch (e) {
+          return res.status(500).send({ error: e.message });
+        }
+      }
       return res.status(404).send({ error: `Method [meshData.${params.method}] not found` });
     }
 

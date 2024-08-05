@@ -7,6 +7,6 @@ import { stopMyCron } from ".";
 
 (async () => {
   const [id] = process.argv.slice(2);
-  await stopMyCron(id ?? 'my-custom-cron-123', 'my.demo.cron');
+  await stopMyCron(id ?? 'my-123-cron', 'my.demo.cron');
   await MeshCall.shutdown();
 })();

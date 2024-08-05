@@ -8,14 +8,19 @@ import { startMyCron } from ".";
 import { setupTelemetry, shutdownTelemetry } from '../modules/tracer';
 
 (async () => {
+  //init telemetry so a trace is assigned
   setupTelemetry();
-  const [id] = process.argv.slice(2);
+
+  //let user override the cron id
+  let [id = 'my-123-cron'] = process.argv.slice(2);
+
   await startMyCron(
-    id ?? 'my-custom-cron-123',
+    id ?? 'my-123-cron',
     'my.demo.cron',
-    null, //don't register a callback. just start the cron
-    ['CoolMesh'],
+    null,
+    [id ?? 'my-123-cron', 'CoolMesh'],
   );
+
   //exit after starting; other workers/engines will do the rest
   await MeshCall.shutdown();
   await shutdownTelemetry();

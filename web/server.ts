@@ -45,15 +45,15 @@ async function initialize() {
   setupTelemetry();
   await initMeshData();
 
-  // Start a custom cron job (cycles 10 times)
+  // Start a custom cron job
   await startMyCron(
-    'my-custom-cron-123',
+    'my-123-cron',
     'my.demo.cron',
-    async (userID: string) => {
-      console.log('cron was called >', userID);
-      return `Welcome, ${userID}.`;
+    async (id: string, input: string) => {
+      console.log('cron  worker called >', id);
+      return `Welcome, ${input}.`;
     },
-    ['CoolMesh'],
+    ['my-123-cron', 'CoolMesh'],
   );
 
   // Express application setup

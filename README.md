@@ -1,8 +1,8 @@
 # HotMesh Samples
 
-This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment. The [demos](./demos/) are structured to run like unit tests, and reveal the full lifecycle of a HotMesh transactional workflow.
+This repo demonstrates the use of HotMesh in a JavaScript/TypeScript environment.  The [demos](./demos/) are structured to run like unit tests, and reveal the full lifecycle of a HotMesh transactional workflow.
 
-The repo also includes a *Dashboard/WebApp* which surfaces all engines, workers, and workflows. Refer to the [meshdata](./meshdata/) directory for details on the namespaces and entities surfaced in the example dashboard.
+The repo also includes a *Dashboard/WebApp* which surfaces all engines, workers, and workflows. The Web App provides a real-time view of the network's health and performance, linking to the OpenTelemetry dashboard for more detailed information. Refer to the [meshdata](./meshdata/) directory for details on the namespaces and entities surfaced in the example dashboard.
 
 ## Table of Contents
 1. [Quickstart](#quickstart)
@@ -11,10 +11,10 @@ The repo also includes a *Dashboard/WebApp* which surfaces all engines, workers,
    - [HotMesh Dashboard](#hotmesh-dashboard)
    - [JavaScript Lifecycle Demos](#javascript-lifecycle-demos)
    - [TypeScript Lifecycle Demos](#typescript-lifecycle-demos)
-2. [HotMesh](#hotmesh)
-   - [Distributed Orchestration](#distributed-orchestration)
-   - [Control Without a Controller](#control-without-a-controller)
-   - [Model-driven Development](#model-driven-development)
+2. [Videos](#videos)
+   - [The Illusion of Control](#the-illusion-of-control)
+   - [Create an Idempotent Cron](#create-an-idempotent-cron)
+   - [Transactional Workflow](#transactional-workflow)
 3. [MeshCall](#meshcall)
    - [Connect Everything](#connect-everything)
    - [Link the Cron Function](#link-the-cron-function)
@@ -32,12 +32,16 @@ The repo also includes a *Dashboard/WebApp* which surfaces all engines, workers,
    - [Execute](#execute)
    - [Execute and Cache](#execute-and-cache)
    - [Execute and Operationalize](#execute-and-operationalize)
-6. [Run the Demos](#run-the-demos)
+6. [HotMesh](#hotmesh)
+   - [Distributed Orchestration](#distributed-orchestration)
+   - [Control Without a Controller](#control-without-a-controller)
+   - [Model-driven Development](#model-driven-development)
+7. [Run the Demos](#run-the-demos)
    - [JavaScript Examples](#javascript-examples)
    - [TypeScript Examples](#typescript-examples)
-7. [Visualize | Open Telemetry](#visualize--opentelemetry)
-8. [Visualize | Redis Insight](#visualize--redisinsight)
-9. [Visualize | HotMesh Dashboard](#visualize--hotmesh-dashboard)
+8. [Visualize | Open Telemetry](#visualize--opentelemetry)
+9. [Visualize | Redis Insight](#visualize--redisinsight)
+10. [Visualize | HotMesh Dashboard](#visualize--hotmesh-dashboard)
 
 ## Quickstart
 
@@ -78,90 +82,22 @@ Run from outside the Docker container.
 - `npm run docker:demo:ts:meshflow` - Run the *MeshFlow* lifecycle example (TypeScript)
 - `npm run docker:demo:ts:meshdata bronze silver gold` - Run the *MeshData* lifecycle example (TypeScript)
 
-## HotMesh
-### Distributed Orchestration
-[HotMesh](https://hotmeshio.github.io/sdk-typescript/classes/services_hotmesh.HotMesh.html) is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
+## Videos
 
-The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis (or a Redis clone such as ValKey) like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
+### The Illusion of Control
+[Video (2m)](https://www.loom.com/share/211bd4b4038d42f0ba34374ef5b6f961?sid=4df13ba8-622f-4e42-880e-b47f8be238d4)
 
-<img src="./docs/img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
+*HotMesh* is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers. This video introduces the concept along with a description of the mechanics of the approach.
 
-The modeling system is based on a [canonical set](https://zenodo.org/records/12168558) of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+### Create an Idempotent Cron
+[Video (9m)](https://www.loom.com/share/3140e810313c4749bdb76ae87f6908dd?sid=4cda17b9-77b4-42ff-8ce2-e544512378cc)
 
-<img src="./docs/img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
+This video demonstrates how to use the MeshCall module to link a cron function to the mesh and run it at server startup. It includes a discussion of idempotency, interruptions, and OpenTelemetry tracing.
 
-Here, for example, is the `worker` activity type. It's reentrant (most activities are), which allows your linked functions to emit in-process messages as they complete a task. The messaging system goes beyond basic request/response and fan-out/fan-in patterns, providing real-time progress updates.
+### Transactional Workflow
+[Video (9m)](https://www.loom.com/share/54ffd5266baf4ac6b287578abfd1d821?sid=cba2708d-01b4-43c1-b317-c0efaebe9c22)
 
-<img src="./docs/img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
-
->Process orchestration is emergent within HotMesh and occurs naturally as a result of processing stream messages. While the reference implementation targets Redis+TypeScript, any language (Rust, Go, Python, Java) and multimodal database (ValKey, DragonFly, etc) can take advantage of the *sequence engine* design pattern.
-
-### Control Without a Controller
-HotMesh is designed as a distributed quorum of engines where each member adheres to the principles of CQRS. According to CQRS, *consumers* are instructed to read events from assigned topic queues while *producers* write to said queues. This division of labor is essential to the smooth running of the system. HotMesh leverages this principle to drive the perpetual behavior of engines and workers (along with other advantages described [here](https://github.com/hotmeshio/sdk-typescript/blob/main/docs/distributed_orchestration.md)). 
-
-As long as their assigned topic queue has items, consumers will read exactly one item and then journal the result to another queue. And as long as all consumers (engines and workers) adhere to this principle, sophisticated workflows emerge.
-
-### Model-driven Development
-The following YAML represents a HotMesh workflow; it includes a *trigger* and a linked *worker* function. The Sequence Engine will step through these instructions one step at a time once deployed.
-
-```yaml
-# myfirstapp.1.yaml
-app:
-  id: myfirstapp
-  version: '1'
-  graphs:
-    - subscribes: myfirstapp.test
-      activities:
-        t1:
-          type: trigger
-        w1:
-          type: worker
-          topic: work.do
-      transitions:
-        t1:
-          - to: w1
-```
-
->The `work.do` *topic* identifies the worker function to execute. This name is arbitrary and should match the semantics of your use case or your own personal preference.
-
-Call `HotMesh.init` to register a *worker* and *engine*. As HotMesh is a distributed orchestration platform, initializing a point of presence like this serves to give the engine another distributed node. If spare CPU is available on the host machine, the *engine role* will be called upon to coordinate the overall workflow. Similarly, invoking the linked worker function, involves the *worker role*.
-
-```javascript
-import * as Redis from 'redis';
-import { HotMesh } from '@hotmeshio/hotmesh';
-
-const hotMesh = await HotMesh.init({
-  appId: 'myfirstapp',
-
-  engine: {
-    redis: {
-      class: Redis,
-      options: { url: 'redis://:key_admin@redis:6379' }
-    }
-  },
-
-  workers: [
-    { 
-      topic: 'work.do',
-      redis: {
-        class: Redis,
-        options: { url: 'redis://:key_admin@redis:6379' }
-      }
-      callback: async (data: StreamData) => {
-        return {
-          metadata: { ...data.metadata },
-          data: { } //optionally process inputs, return output
-        };
-      }
-    }
-  ]
-});
-
-await hotMesh.deploy('./myfirstapp.1.yaml');
-await hotMesh.activate('1');
-const response = await hotMesh.pubsub('myfirstapp.test', {});
-//returns {}
-```
+This video demonstrates how to use the MeshFlow module to create durable, transactional workflows. Workflow visualizations are provided using the HotMesh Dashboard and the Honeycomb OpenTelemetry Dashboard. The video also includes a discussion of Temporal.io and some background on how MeshFlow emulates the Temporal application server using a swarm of lightweight message routers.
 
 ## MeshCall
 
@@ -470,7 +406,91 @@ const response = await meshdata.exec({
 // AND REMAINS ACTIVE!
 ```
 
-Refer to the [SDK/Docs](https://hotmeshio.github.io/meshdata-typescript/index.html) for a full overview of MeshData's features.
+
+## HotMesh
+### Distributed Orchestration
+[HotMesh](https://hotmeshio.github.io/sdk-typescript/classes/services_hotmesh.HotMesh.html) is a distributed modeling and orchestration system capable of encapsulating existing systems, such as Business Process Management (BPM) and Enterprise Application Integration (EAI). The central innovation is its ability to compile its models into Distributed Executables, replacing a traditional Application Server with a network of Decentralized Message Routers.
+
+The following depicts the mechanics of the approach and describes what is essentially a *sequence engine*. Time is an event source in the system, while sequence is the final arbiter. This allows the system to use Redis (or a Redis clone such as ValKey) like a balloon, flexibly expanding and deflating as the network adjusts to its evolving workload.
+
+<img src="./docs/img/stream_driven_workflow_with_redis.png" alt="A stream-driven workflow engine" style="max-width:100%;width:800px;">
+
+The modeling system is based on a [canonical set](https://zenodo.org/records/12168558) of 9 message types (and corresponding transitions) that guarantee the coordinated flow in the absence of a central controller.
+
+<img src="./docs/img/hotmesh_canonical_types.png" alt="HotMesh Canonical Message and Transition types" style="max-width:100%;width:800px;">
+
+Here, for example, is the `worker` activity type. It's reentrant (most activities are), which allows your linked functions to emit in-process messages as they complete a task. The messaging system goes beyond basic request/response and fan-out/fan-in patterns, providing real-time progress updates.
+
+<img src="./docs/img/worker_activity_and_transitions.png" alt="HotMesh Canonical Worker type" style="max-width:100%;width:800px;">
+
+>Process orchestration is emergent within HotMesh and occurs naturally as a result of processing stream messages. While the reference implementation targets Redis+TypeScript, any language (Rust, Go, Python, Java) and multimodal database (ValKey, DragonFly, etc) can take advantage of the *sequence engine* design pattern.
+
+### Control Without a Controller
+HotMesh is designed as a distributed quorum of engines where each member adheres to the principles of CQRS. According to CQRS, *consumers* are instructed to read events from assigned topic queues while *producers* write to said queues. This division of labor is essential to the smooth running of the system. HotMesh leverages this principle to drive the perpetual behavior of engines and workers (along with other advantages described [here](https://github.com/hotmeshio/sdk-typescript/blob/main/docs/distributed_orchestration.md)). 
+
+As long as their assigned topic queue has items, consumers will read exactly one item and then journal the result to another queue. And as long as all consumers (engines and workers) adhere to this principle, sophisticated workflows emerge.
+
+### Model-driven Development
+The following YAML represents a HotMesh workflow; it includes a *trigger* and a linked *worker* function. The Sequence Engine will step through these instructions one step at a time once deployed.
+
+```yaml
+# myfirstapp.1.yaml
+app:
+  id: myfirstapp
+  version: '1'
+  graphs:
+    - subscribes: myfirstapp.test
+      activities:
+        t1:
+          type: trigger
+        w1:
+          type: worker
+          topic: work.do
+      transitions:
+        t1:
+          - to: w1
+```
+
+>The `work.do` *topic* identifies the worker function to execute. This name is arbitrary and should match the semantics of your use case or your own personal preference.
+
+Call `HotMesh.init` to register a *worker* and *engine*. As HotMesh is a distributed orchestration platform, initializing a point of presence like this serves to give the engine another distributed node. If spare CPU is available on the host machine, the *engine role* will be called upon to coordinate the overall workflow. Similarly, invoking the linked worker function, involves the *worker role*.
+
+```javascript
+import * as Redis from 'redis';
+import { HotMesh } from '@hotmeshio/hotmesh';
+
+const hotMesh = await HotMesh.init({
+  appId: 'myfirstapp',
+
+  engine: {
+    redis: {
+      class: Redis,
+      options: { url: 'redis://:key_admin@redis:6379' }
+    }
+  },
+
+  workers: [
+    { 
+      topic: 'work.do',
+      redis: {
+        class: Redis,
+        options: { url: 'redis://:key_admin@redis:6379' }
+      }
+      callback: async (data: StreamData) => {
+        return {
+          metadata: { ...data.metadata },
+          data: { } //optionally process inputs, return output
+        };
+      }
+    }
+  ]
+});
+
+await hotMesh.deploy('./myfirstapp.1.yaml');
+await hotMesh.activate('1');
+const response = await hotMesh.pubsub('myfirstapp.test', {});
+//returns {}
+```
 
 ## Run the Demos
 

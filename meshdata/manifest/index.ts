@@ -15,6 +15,7 @@ import { schema as SandboxBillSchema } from '../namespaces/sandbox/bill/schema';
 import { schema as SandboxTestSchema } from '../namespaces/sandbox/test/schema';
 import { schema as InventorySchema } from '../namespaces/inventory/schema';
 import { EntityInstanceTypes, Namespaces, Profiles } from '../../types/manifest';
+import { Types } from '@hotmeshio/hotmesh';
 
 /**
  * The dashboard will only load those backend dbs where the environment
@@ -275,6 +276,22 @@ export const findEntity = (database: string, namespace: string, entity: string):
   }
   return target;
 };
+
+export const findSchemas = (database: string, ns: string): Record<string, Types.WorkflowSearchSchema> => {
+  if (!database || !profiles[database] || !profiles[database]?.db?.config?.REDIS_HOST) {
+    const activeProfiles = Object.keys(profiles).filter((key) => profiles[key]?.db?.config?.REDIS_HOST);
+    throw new Error(`The database query parameter [${database}] was not found. Use one of: ${activeProfiles.join(', ')}`);
+  }
+  const profile = profiles[database];
+  const namespacedInstance = profile.instances[ns];
+  const schemas: Record<string, Types.WorkflowSearchSchema> = {};
+  for(let entityName in namespacedInstance) {
+    const entityInstance = namespacedInstance[entityName];
+    const opts = entityInstance.getSearchOptions();
+    schemas[opts.index ?? entityName] = opts.schema;
+  }
+  return schemas;
+}
 
 /**
  * Safely serialize the manifest for transmission to the client.
