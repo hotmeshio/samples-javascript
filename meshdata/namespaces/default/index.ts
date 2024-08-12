@@ -1,7 +1,6 @@
 import { Types } from '@hotmeshio/hotmesh';
 
 import { BaseEntity } from '../base';
-
 import { schema as DefaultSchema } from './schema';
 
 /**

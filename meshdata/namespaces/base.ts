@@ -28,7 +28,7 @@ abstract class BaseEntity {
     );
   }
 
-  protected async defaultTargetFn(id: string): Promise<string> {
+  protected async defaultTargetFn(): Promise<string> {
     return 'OK';
   }
 
@@ -44,7 +44,7 @@ abstract class BaseEntity {
 
   async init(search = true) {
     await this.connect();
-    //Redis backends with the FT.SEARCH module support search
+    //if the FT.SEARCH module is enabled
     if (search) {
       await this.index();
     }
@@ -93,7 +93,9 @@ abstract class BaseEntity {
     return result;
   }
 
-
+  /**
+   * Update entity
+   */
   async update(id: string, body: Record<string, any>) {
     await this.retrieve(id);
     await this.meshData.set(
@@ -107,12 +109,18 @@ abstract class BaseEntity {
     return await this.retrieve(id);
   }
 
+  /**
+   * Delete entity
+   */
   async delete(id: string) {
     await this.retrieve(id);
     await this.meshData.flush(this.getEntity(), id, this.getNamespace());
     return true;
   }
 
+  /**
+   * Find matching entities
+   */
   async find(query: { field: string, is: '=' | '[]' | '>=' | '<=', value: string }[] = [], start = 0, size = 100): Promise<{ count: number; query: string; data: Types.StringStringType[]; }> {
     const opts = this.getSearchOptions();
     const response = await this.meshData.findWhere(
@@ -128,7 +136,7 @@ abstract class BaseEntity {
   }
 
   /**
-   * Count data
+   * Count matching entities
    */
   async count(query: { field: string, is: '=' | '[]' | '>=' | '<=', value: string }[]): Promise<number> {
     return await this.meshData.findWhere(
@@ -141,10 +149,8 @@ abstract class BaseEntity {
   }
 
   /**
-   * Aggregate data
+   * Aggregate matching entities
    */
-
-  // TODO: replace size/start parameters with cursor API
   async aggregate(filter: { field: string, is: '=' | '[]' | '>=' | '<=', value: string }[] = [], apply: { expression: string, as: string }[] = [], rows: string[] = [], columns: string[] = [], reduce: { operation: string, as: string }[] = [], sort: { field: string, order: 'ASC' | 'DESC' }[] = [], start = 0, size = 100): Promise<any> {
     let command = ['FT.AGGREGATE', this.getIndexName() || 'default'];
 
@@ -227,40 +233,6 @@ abstract class BaseEntity {
 
       throw e;
     }
-  }
-
-  /**
-   * Transforms the keys of a flat JSON object using a provided symbol mapping.
-   * @param obj The object to transform.
-   * @param sym The symbol mapping object that maps shorthand keys to their full names.
-   * @returns A new object with transformed keys.
-   */
-  transformKeys(obj: any, sym: Record<string, string>): any {
-    const reversedSym = {};
-    for (const key in sym) {
-      if (sym.hasOwnProperty(key)) {
-        reversedSym[sym[key]] = key; // Reverse the key-value pair
-      }
-    }
-    const transformed = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const expandedKey = reversedSym[key] || key;  // Use the expanded key if available, else use the original key
-        if (expandedKey.includes('/')) {
-          // Handle nested keys
-          const parts = expandedKey.split('/');
-          let current = transformed;
-          for (let i = 0; i < parts.length - 1; i++) {
-            current[parts[i]] = current[parts[i]] || {}; // Create nested object if it doesn't exist
-            current = current[parts[i]];
-          }
-          current[parts[parts.length - 1]] = obj[key];
-        } else {
-          transformed[expandedKey] = obj[key];
-        }
-      }
-    }
-    return transformed;
   }
 
   workflow = {}

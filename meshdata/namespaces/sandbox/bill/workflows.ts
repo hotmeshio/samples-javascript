@@ -13,7 +13,9 @@ const { doSendBill } = MeshData.proxyActivities<typeof activities>({
   }
 });
 
-//create/send a bill
+/**
+ * Create a bill.
+ */
 export const create = async ({ userId, planId, plan, cycle, timestamp }): Promise<number> => {
   const search = await MeshData.workflow.search();
   await search.set(

@@ -13,7 +13,7 @@ import { schema as RoutingOrderSchema } from '../namespaces/routing/order/schema
 import { schema as SandboxUserSchema } from '../namespaces/sandbox/user/schema';
 import { schema as SandboxBillSchema } from '../namespaces/sandbox/bill/schema';
 import { schema as SandboxTestSchema } from '../namespaces/sandbox/test/schema';
-import { schema as InventorySchema } from '../namespaces/inventory/schema';
+import { schema as InventorySchema, schema } from '../namespaces/inventory/schema';
 import { EntityInstanceTypes, Namespaces, Profiles } from '../../types/manifest';
 import { Types } from '@hotmeshio/hotmesh';
 
@@ -29,7 +29,7 @@ const USE_VALKEY = process.env.USE_VALKEY === 'true';
 
 /**
  * The dashboard service can surface multiple databases, each of which may
- * have multiple namespaces, each of which has separate entities.
+ * have multiple namespaces, each of which has multiple entities.
  */
 export const dbs = {
   redis: {
@@ -171,9 +171,9 @@ export const namespaces: Namespaces = {
   },
 };
 
-//associates each database with the app (namespaces) we wish to deploy
-//these will be installed once the points of presence connect and
-//it is discovered by one of the engines that the backend hasn't been set up 
+//associate each profile (database) with one or more namespaces
+//HotMesh will automatically install the app to the location
+//if it does not exist upon connecting
 export const profiles: Profiles = {
   redis: {
     db: dbs.redis,
@@ -319,6 +319,7 @@ export const toJSON = (p: Profiles = profiles): any => {
         result[key].namespaces[ns].entities.push({
           name: entity.name,
           label: entity.label,
+          schema: entity.schema,
         });
       }
     }

@@ -53,5 +53,4 @@ export const schema: Types.WorkflowSearchSchema = {
     required: true,
     examples: ['monthly', 'yearly']
   }
-  };
-  
+};

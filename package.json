@@ -1,6 +1,6 @@
 {
   "name": "samples-typescript",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "HotMesh LifeCycle Sandbox",
   "scripts": {
     "clean": "rimraf ./build",
@@ -53,7 +53,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@honeycombio/opentelemetry-node": "^0.7.2",
-    "@hotmeshio/hotmesh": "^0.2.4",
+    "@hotmeshio/hotmesh": "^0.3.0",
     "@opentelemetry/auto-instrumentations-node": "^0.47.1",
     "@opentelemetry/sdk-node": "^0.52.1",
     "cors": "^2.8.5",

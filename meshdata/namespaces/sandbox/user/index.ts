@@ -4,6 +4,7 @@ import { BaseEntity } from '../../base';
 
 import { schema as UserSchema } from './schema';
 import * as workflows from './workflows'
+import * as hooks from './hooks';
 
 /**
  * The 'User' entity. Shows how Redis-backed governance is able to
@@ -15,26 +16,18 @@ import * as workflows from './workflows'
  */
 class User extends BaseEntity {
 
-  static getTaskQueue(): string {
-    return 'v1';
-  }
-
-  protected getTaskQueue(): string {
-    return User.getTaskQueue();
-  }
-
-  static getEntity(): string {
+  getEntity(): string {
     return 'user';
   }
 
-  getEntity(): string {
-    return User.getEntity();
+  getTaskQueue(): string {
+    return 'v1'
   }
 
   getSearchOptions(): Types.WorkflowSearchOptions {
     return {
-      index: `${this.getNamespace()}-${User.getEntity()}`,
-      prefix: [User.getEntity()],
+      index: `${this.getNamespace()}-${this.getEntity()}`,
+      prefix: [this.getEntity()],
       schema: UserSchema,
     };
   }
@@ -43,26 +36,26 @@ class User extends BaseEntity {
    * Connect workflow and hook functions (user and user.bill)
    */
   async connect() {
+    //connect the 'user' transactional workflow
     await this.meshData.connect({
-      entity: User.getEntity(),
+      entity: this.getEntity(),
       target: workflows.create,
       options: {
         namespace: this.getNamespace(),
-        taskQueue: 'v1',
+        taskQueue: this.getTaskQueue(),
       },
     });
 
+    //connect the 'user.bill' transactional hook
     await this.meshData.connect({
-      entity: `${User.getEntity()}.bill`,
-      target: workflows.bill,
+      entity: 'user.bill',
+      target: hooks.bill,
       options: {
         namespace: this.getNamespace(),
-        taskQueue: 'v1',
+        taskQueue: this.getTaskQueue(),
       },
     });
   }
-
-  //********** Web API Entry points ******************
 
   /**
    * Create User
@@ -70,14 +63,15 @@ class User extends BaseEntity {
   async create(body: Record<string, any>) {
     const { id, email, first, last, plan, cycle } = body;
 
+    //call the 'user' transactional workflow
     await this.meshData.exec<string>({
-      entity: User.getEntity(),
+      entity: this.getEntity(),
       args: [id],
       options: {
         id,
         search: {
           data: {
-            '$entity': User.getEntity(),
+            '$entity': this.getEntity(),
             active: 'true',
             id,
             email,
@@ -89,7 +83,7 @@ class User extends BaseEntity {
           }
         },
         namespace: this.getNamespace(),
-        taskQueue: User.getTaskQueue(),
+        taskQueue: this.getTaskQueue(),
         ttl: '100 years',
       }
     });
@@ -99,14 +93,14 @@ class User extends BaseEntity {
   }
 
   /**
-   * Save the user's chosen plan; trigger the `user.bill` hook (a 
-   * recurring process that sends a bill every month or year, depending)
+   * Update user plan; spawns the 'user.bill' transactional hook (a
+   * recurring monthly/yearly process)
    */
   async plan(id: string, data: { plan: string, cycle: string }): Promise<Record<string, any>> {
     //exit early if user not found
     await this.retrieve(id, true);
     const state = await this.meshData.get(
-      User.getEntity(),
+      this.getEntity(),
       id,
       {
         fields: ['plan', 'cycle'],
@@ -123,13 +117,13 @@ class User extends BaseEntity {
 
     //run the 'user.bill' transactional hook workflow
     await this.meshData.hook({
-      entity: User.getEntity(),
+      entity: this.getEntity(),
       id,
-      hookEntity: `${User.getEntity()}.bill`,
+      hookEntity: `${this.getEntity()}.bill`,
       hookArgs: [HotMesh.guid(), data.plan, data.cycle],
       options: {
         namespace: this.getNamespace(),
-        taskQueue: User.getTaskQueue(),
+        taskQueue: this.getTaskQueue(),
       },
     });
 

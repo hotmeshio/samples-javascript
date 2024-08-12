@@ -333,17 +333,8 @@ For those deployments with the Redis `FT.SEARCH` module enabled, it's possible t
 - `Workflow Extensions`: Offers a suite of workflow extension methods including hooks for extending functionality, signal handling for inter-process communication, and sleep for delaying execution.
 - `Search and Indexing`: Provides tools for managing workflow state and leveraging Redis' search capabilities to query operational data.
 
-### Ad Hoc Operational Networks
-The following is a typical microservices network, with a tangled mess of services and functions. There's important business logic in there (functions *A*, *B* and *C* are critical), but it's hard to find and access.
-
-<img src="./docs/img/operational_data_layer.png" alt="A Tangled Microservices Network with 3 valuable functions buried within" style="max-width:100%;width:600px;">
-
-MeshData creates an *ad hoc*, Redis-backed network of functions (an "operational data layer"). It's a simple, yet powerful, way to expose and unify your most important functions into a single mesh.
-
-*Any service with access to Redis can join in the network, bypassing the legacy clutter.*
-
 ### Connect
-Easily expose your target functions. Here the legacy `getUser` function is registered as `user`.
+Expose your target functions. Here the legacy `getUser` function is registered as `user`.
 
 ```javascript
 import * as Redis from 'redis'; //or `import Redis from 'ioredis'`
@@ -379,33 +370,21 @@ const response = await meshdata.exec({
 //returns { id: 'jsmith123', name: 'Jan Smith', ... }
 ```
 
-### Execute and Cache
-Provide an `id` and `ttl` flag in the format `1 minute`, `2 weeks`, `3 months`, etc to cache the function response. This is a great way to alleviate an overburdened database...and it's a familiar pattern for those who already use Redis as a cache.
+### Execute, Cache and Operationalize
+Provide an `id` and `ttl` flag in the format `1 minute`, `2 weeks`, `3 months`, `infinity`, etc to cache the function response, alleviate an overburdened database, or simply take advantage of Redis' millisecond-level read performance.
 
 ```javascript
 const response = await meshdata.exec({
   entity: 'user',
   args: ['jsmith123'],
-  options: { id: 'jsmith123', ttl: '15 minutes' },
-});
-
-//returns cached { id: 'jsmith123', name: 'Jan Smith', ... }
-```
-
-### Execute and Operationalize
-Provide a `ttl` of `infinity` to operationalize the function. It's now a **durable workflow** with all the benefits of Redis-backed governance.
-
-```javascript
-const response = await meshdata.exec({
-  entity: 'user',
-  args: ['jsmith123'],
-  options: { id: 'jsmith123', ttl: 'infinity' },
+  options: { id: 'jsmith123', ttl: '1 week' },
 });
 
 //returns cached { id: 'jsmith123', name: 'Jan Smith', ... }
 // AND REMAINS ACTIVE!
 ```
 
+>By specifying a `ttl`, the function transforms into a **persistent workflow** with all the benefits of Redis-backed governance for the duration specified. Even if the main workflow function completes, the entity remains active and additional 'hook' functions can augment its state, by spawning reentrant subflows.
 
 ## HotMesh
 ### Distributed Orchestration
