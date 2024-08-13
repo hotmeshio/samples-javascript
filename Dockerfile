@@ -29,9 +29,9 @@ RUN npm run build
 
 FROM base AS production
 ENV NODE_ENV=production
+COPY --from=build /home/node/app/build /app/build
 COPY package*.json ./
 RUN npm ci
 
-COPY app/build ./app/build
-COPY --from=build /home/node/app/build/ .
+COPY --from=build /home/node/app/build /app/build
 CMD ["node", "web/server.js"]

@@ -29,13 +29,21 @@ router.post('/', async (req, res) => {
   }
 });
 
-// add new point of presence (a worker or an engine)
+// add new point/s of presence (worker/engine)
 router.post('/swarm', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
     const test = findEntity(query.database, query.namespace, 'test') as Test;
     let body = req.body as { type: 'worker' | 'engine', count?: number };
-    res.json(await test.deployPointOfPresence(body.type));
+    if (body.type === 'worker') {
+      for (let i = 0; i < (body.count || 1); i++) {
+        res.json(await test.deployWorker());
+      }
+    } else {
+      for (let i = 0; i < (body.count || 1); i++) {
+        res.json(await test.deployEngine());
+      }
+    }
   } catch (err) {
     res.status(500).send({ error: err.message });
   }

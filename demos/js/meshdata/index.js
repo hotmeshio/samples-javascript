@@ -67,7 +67,7 @@ setupTelemetry();
           search: {
             data: { id: inputArg, plan: 'pro' }
           },
-          namespace: 'meshdata', //redis app name (default is 'durable')
+          namespace: 'meshdata', //redis app name (default is 'meshflow')
           signalIn: false, //false since demo doesn't showcase 'hooks' and 'signals'
         },
       });

@@ -66,7 +66,7 @@ const redisConfig = getRedisConfig();
           search: {
             data: { id: inputArg, plan: 'pro' }
           },
-          namespace: 'meshdata', //default is 'durable'
+          namespace: 'meshdata', //default is 'meshflow'
         },
       });
 
