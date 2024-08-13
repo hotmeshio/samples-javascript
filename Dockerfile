@@ -29,9 +29,9 @@ RUN npm run build
 
 FROM base AS production
 ENV NODE_ENV=production
-COPY --from=build /home/node/app/build /app/build
 COPY package*.json ./
 RUN npm ci
-
-COPY --from=build /home/node/app/build /app/build
+## copy static webapp (in prod would come from the CDN)
+COPY webapp ./webapp
+COPY --from=build /home/node/app/build .
 CMD ["node", "web/server.js"]
