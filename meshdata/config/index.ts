@@ -1,5 +1,4 @@
 import * as Redis from 'redis';
-import { Types } from '@hotmeshio/hotmesh';
 
 import { dbs } from '../manifest';
 

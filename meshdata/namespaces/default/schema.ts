@@ -11,4 +11,12 @@ export const schema : Types.WorkflowSearchSchema = {
     type: 'TAG',
     sortable: false,
   },
+  plan: {
+    type: 'TAG',
+    sortable: true,
+  },
+  active: {
+    type: 'TEXT',
+    sortable: false,
+  },
 };

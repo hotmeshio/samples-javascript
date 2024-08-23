@@ -14,6 +14,7 @@ const redisConfig = getRedisConfig();
 
 (async () => {
   try {
+    const namespace = 'meshdata';
     let inputArgs = process.argv.slice(2);
     if (!inputArgs.length) {
       inputArgs = ['bronze', 'silver', 'gold'];
@@ -26,7 +27,7 @@ const redisConfig = getRedisConfig();
         plan: { type: 'TAG', sortable: true },
         active: { type: 'TEXT', sortable: false },
       },
-      index: 'meshdata-default',    //the index name in Redis is 'default'
+      index: `${namespace}-default`, //the index name in Redis is 'default'
       prefix: ['default'], //only index documents with keys that begin with 'default'
     } as unknown as Types.WorkflowSearchOptions;
 
@@ -49,7 +50,7 @@ const redisConfig = getRedisConfig();
         //simulate a database call
         return `Welcome, ${inputArg}.`;
       },
-      options: { namespace: 'meshdata' },
+      options: { namespace },
     });
 
     // Loop; call the 'default' worker for each user
@@ -66,7 +67,7 @@ const redisConfig = getRedisConfig();
           search: {
             data: { id: inputArg, plan: 'pro' }
           },
-          namespace: 'meshdata', //default is 'meshflow'
+          namespace, //default is 'meshflow'
         },
       });
 
@@ -76,7 +77,7 @@ const redisConfig = getRedisConfig();
         inputArg,
         { 
           fields: ['plan', 'id', 'active'],
-          namespace: 'meshdata'
+          namespace
         },
       );
 
@@ -89,7 +90,7 @@ const redisConfig = getRedisConfig();
     } else {
       //6) Create a search index
       console.log('\n\n* creating search index ...');
-      await meshData.createSearchIndex('meshflow-default', { namespace: 'meshdata' }, schema);
+      await meshData.createSearchIndex('meshflow-default', { namespace }, schema);
 
       //7) Full Text Search for records
       const results = await meshData.findWhere('default', {
@@ -99,7 +100,7 @@ const redisConfig = getRedisConfig();
       });
       console.log(`\n\n* matching message (${inputArgs[inputArgs.length - 1]}) ...\n`, results, '\n');
     }
-    const jobState = await meshData.info('default', inputArgs[0], { namespace: 'meshdata' });
+    const jobState = await meshData.info('default', inputArgs[0], { namespace });
 
     //8) Shutdown
     await MeshData.shutdown();

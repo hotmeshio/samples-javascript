@@ -14,6 +14,7 @@ setupTelemetry();
 (async () => {
   const redisConfig = getRedisConfig();
   try {
+    const namespace = 'meshdata';
     let inputArgs = process.argv.slice(2);
     if (!inputArgs.length) {
       inputArgs = ['bronze', 'silver', 'gold'];
@@ -26,7 +27,7 @@ setupTelemetry();
         plan: { type: 'TAG', sortable: true },
         active: { type: 'TEXT', sortable: false },
       },
-      index: 'default',    //the index name in Redis is 'default'
+      index: `${namespace}-default`,    //the index name in Redis is 'default'
       prefix: ['default'], //only index documents with keys that begin with 'default'
     };
 
@@ -50,7 +51,7 @@ setupTelemetry();
         //simulate a database call
         return `Welcome, ${inputArg}.`;
       },
-      options: { namespace: 'meshdata' },
+      options: { namespace },
     });
 
     // Loop; call the 'default' worker for each user
@@ -67,7 +68,7 @@ setupTelemetry();
           search: {
             data: { id: inputArg, plan: 'pro' }
           },
-          namespace: 'meshdata', //redis app name (default is 'meshflow')
+          namespace,       //redis app name (default is 'meshflow')
           signalIn: false, //false since demo doesn't showcase 'hooks' and 'signals'
         },
       });
@@ -78,7 +79,7 @@ setupTelemetry();
         inputArg,
         { 
           fields: ['plan', 'id', 'active'],
-          namespace: 'meshdata'
+          namespace,
         },
       );
 
@@ -91,7 +92,7 @@ setupTelemetry();
     } else {
       //6) Create a search index
       console.log('\n\n* creating search index ...');
-      await meshData.createSearchIndex('default', { namespace: 'meshdata' }, schema);
+      await meshData.createSearchIndex('default', { namespace }, schema);
 
       //7) Full Text Search for records
       const results = await meshData.findWhere('default', {
@@ -101,7 +102,7 @@ setupTelemetry();
       });
       console.log(`\n\n* matching message (${inputArgs[inputArgs.length - 1]}) ...\n`, results, '\n');
     }
-    const jobState = await meshData.info('default', inputArgs[0], { namespace: 'meshdata' });
+    const jobState = await meshData.info('default', inputArgs[0], { namespace });
 
     //8) Shutdown
     await MeshData.shutdown();
