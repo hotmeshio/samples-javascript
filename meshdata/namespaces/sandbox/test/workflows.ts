@@ -15,16 +15,16 @@ const { doTestProxy } = MeshData.proxyActivities<typeof activities>({ activities
 export const startTest = async({ id, type, timestamp, width, depth, wait, memo = '' }: TestArgs): Promise<number> => {
   //set a handful of searchable, indexed fields
   const search = await MeshData.workflow.search();
-  await search.set(
-    '$entity', 'test',
-    'id', id,
-    'type', type,
-    'timestamp', timestamp.toString(),
-    'width', width.toString(),
-    'depth', depth.toString(),
-    'count', testCount(width, depth).toString(),
-    'memo', memo.toString(),
-  );
+  await search.set({
+    $entity: 'test',
+    id,
+    type,
+    timestamp: timestamp.toString(),
+    width:  width.toString(),
+    depth: depth.toString(),
+    count: testCount(width, depth).toString(),
+    memo: memo.toString(),
+  });
 
   if (depth > 1) {
     const childWorkflows: Array<Promise<string | number>> = [];

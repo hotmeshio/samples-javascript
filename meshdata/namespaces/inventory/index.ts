@@ -1,11 +1,10 @@
-import { Types } from '@hotmeshio/hotmesh';
+import { MeshOS, Types } from '@hotmeshio/hotmesh';
 
 import { dateTimestamp, safeData } from '../../../modules/utils';
-import { BaseEntity } from '../base';
 
 import { schema as InventorySchema } from './schema';
 
-class Inventory extends BaseEntity {
+class Inventory extends MeshOS {
 
   getTaskQueue(): string {
     return 'v1';

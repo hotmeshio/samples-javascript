@@ -1,14 +1,13 @@
-import { Types } from '@hotmeshio/hotmesh';
+import { MeshOS, Types } from '@hotmeshio/hotmesh';
 
 import { unixTimestamp, dateTimestamp, safeData } from '../../../../modules/utils';
-import { BaseEntity } from '../../base';
 
 import { schema as RoutingOrderSchema } from './schema';
 
 /**
  * The 'order' entity, representing a single mail piece.
  */
-class Order extends BaseEntity {
+class Order extends MeshOS {
 
   getTaskQueue(): string {
     return 'v1';

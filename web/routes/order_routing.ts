@@ -1,6 +1,6 @@
+import { MeshOS } from '@hotmeshio/hotmesh';
 import { Router } from 'express';
 
-import { findEntity } from '../../meshdata/manifest';
 import { Order } from '../../meshdata/namespaces/routing/order';
 
 const router = Router();
@@ -9,7 +9,7 @@ const router = Router();
 router.get('/schema', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     res.json(order.getSearchOptions());
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -20,7 +20,7 @@ router.get('/schema', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     res.json(await order.add(req.body as Body));
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     res.status(201).send(await order.find([], 0, 100));
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
 router.get('/:orderId', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     const { orderId } = req.params;
     res.status(200).send(await order.retrieve(orderId));
   } catch (err) {
@@ -57,7 +57,7 @@ router.patch('/:orderId', async (req, res) => {
   let updatedUser: Record<string, any>;
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     updatedUser = await order.update(orderId, req.body);
   } catch (err) {
     return res.status(500).send({ error: err.message });
@@ -70,7 +70,7 @@ router.patch('/:orderId', async (req, res) => {
 router.delete('/:orderId', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     const { orderId } = req.params;
     await order.delete(orderId);
     res.json({ status: 'success' });
@@ -83,7 +83,7 @@ router.delete('/:orderId', async (req, res) => {
 router.post('/aggregate', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const order = findEntity(query.database, query.namespace, 'order') as Order;
+    const order = MeshOS.findEntity(query.database, query.namespace, 'order') as Order;
     res.json(await order.aggregate(req.body.filter, req.body.apply, req.body.rows, req.body.columns, req.body.reduce, req.body.sort, req.body.start, req.body.size));
   } catch (err) {
     res.status(500).send({ error: err.message });

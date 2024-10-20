@@ -1,6 +1,4 @@
-import { HotMesh, Types, MeshData } from '@hotmeshio/hotmesh';
-
-import { BaseEntity } from '../../base';
+import { HotMesh, MeshOS, Types } from '@hotmeshio/hotmesh';
 
 import { schema as UserSchema } from './schema';
 import * as workflows from './workflows'
@@ -14,7 +12,7 @@ import * as hooks from './hooks';
  * can be interleaved that transactionally update primary state.
  * 
  */
-class User extends BaseEntity {
+class User extends MeshOS {
 
   getEntity(): string {
     return 'user';
@@ -131,4 +129,4 @@ class User extends BaseEntity {
   }
 }
 
-export { User, MeshData };
+export { User };

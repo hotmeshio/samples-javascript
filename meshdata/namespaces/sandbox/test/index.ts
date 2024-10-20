@@ -1,9 +1,8 @@
-import { MeshData, Types, HotMesh } from '@hotmeshio/hotmesh';
+import { HotMesh, MeshOS, Types } from '@hotmeshio/hotmesh';
 
 import config from '../../../../config';
 import { testCount } from '../../../../modules/utils';
 import { TestInput } from '../../../../types/test';
-import { BaseEntity } from '../../base';
 
 import { schema as TestSchema } from './schema';
 import * as workflows from './workflows'
@@ -12,7 +11,7 @@ import * as workflows from './workflows'
  * The 'Test' entity.
  * 
  */
-class Test extends BaseEntity {
+class Test extends MeshOS {
 
   getTaskQueue(): string {
     return 'v1';
@@ -98,4 +97,4 @@ class Test extends BaseEntity {
   }
 }
 
-export { Test, MeshData };
+export { Test };

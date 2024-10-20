@@ -1,13 +1,12 @@
-import { Types } from '@hotmeshio/hotmesh';
+import { MeshOS, Types } from '@hotmeshio/hotmesh';
 
-import { BaseEntity } from '../base';
 import { schema as DefaultSchema } from './schema';
 
 /**
  * catch-all entity type that allows for generic hotmesh workflows
  * to be surfaced in the dashboard (as the dashboard is entity-focused)
  */
-class DefaultEntity extends BaseEntity {
+class DefaultEntity extends MeshOS {
 
   async connect() {
     console.log('default entity connected!');

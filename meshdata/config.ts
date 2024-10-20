@@ -1,15 +1,15 @@
 import * as Redis from 'redis';
 
-import { dbs } from '../manifest';
+import { databases } from '../web/utils/meshdata';
 
 /**
  * verify user-provided target database. if invalid, use the first available
  */
 const findFirstAvailableDb = (target: string) => {
-  if (target && dbs[target]?.config.REDIS_HOST) {
+  if (target && databases[target]?.config.REDIS_HOST) {
     return target;
   }
-  return Object.keys(dbs).find((key) => dbs[key].config.REDIS_HOST);
+  return Object.keys(databases).find((key) => databases[key].config.REDIS_HOST);
 }
 
 /**
@@ -18,9 +18,9 @@ const findFirstAvailableDb = (target: string) => {
  */
 export const getRedisConfig = (target = process.env.DEMO_DB || 'redis') => {
   target = findFirstAvailableDb(target);
-  const dbConfig = dbs[target].config;
+  const dbConfig = databases[target].config;
   const protocol = dbConfig.REDIS_USE_TLS ? 'rediss' : 'redis';
-  const url = `${protocol}://${dbConfig.REDIS_USERNAME}:${dbConfig.REDIS_PASSWORD}@${dbConfig.REDIS_HOST}:${dbConfig.REDIS_PORT}`;
+  const url = `${protocol}://${dbConfig.REDIS_USERNAME ?? ''}:${dbConfig.REDIS_PASSWORD}@${dbConfig.REDIS_HOST}:${dbConfig.REDIS_PORT}`;
   return {
     class: Redis,
     options: {

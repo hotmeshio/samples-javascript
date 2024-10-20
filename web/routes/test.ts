@@ -1,5 +1,6 @@
+import { MeshOS } from '@hotmeshio/hotmesh';
 import { Router } from 'express';
-import { findEntity } from '../../meshdata/manifest';
+
 import { Test } from '../../meshdata/namespaces/sandbox/test';
 import { TestInput } from '../../types/test';
 
@@ -9,7 +10,7 @@ const router = Router();
 router.get('/schema', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     res.json(test.getSearchOptions());
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -20,7 +21,7 @@ router.get('/schema', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     let body = req.body as Partial<TestInput>;
     body.database = query.database;
     res.json(await test.start(body as TestInput));
@@ -33,7 +34,7 @@ router.post('/', async (req, res) => {
 router.post('/swarm', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     let body = req.body as { type: 'worker' | 'engine', count?: number };
     if (body.type === 'worker') {
       for (let i = 0; i < (body.count || 1); i++) {
@@ -53,7 +54,7 @@ router.post('/swarm', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     res.status(200).send(await test.find([], 0, 100));
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -64,7 +65,7 @@ router.get('/', async (req, res) => {
 router.get('/:testId', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     const { testId } = req.params;
     res.status(200).send(await test.retrieve(testId));
   } catch (err) {
@@ -76,7 +77,7 @@ router.get('/:testId', async (req, res) => {
 router.delete('/:testId', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     const { testId } = req.params;
     await test.delete(testId);
     res.json({ status: 'success' });
@@ -89,7 +90,7 @@ router.delete('/:testId', async (req, res) => {
 router.post('/aggregate', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const test = findEntity(query.database, query.namespace, 'test') as Test;
+    const test = MeshOS.findEntity(query.database, query.namespace, 'test') as Test;
     res.json(await test.aggregate(req.body.filter, req.body.apply, req.body.rows, req.body.columns, req.body.reduce, req.body.sort, req.body.start, req.body.size));
   } catch (err) {
     res.status(500).send({ error: err.message });

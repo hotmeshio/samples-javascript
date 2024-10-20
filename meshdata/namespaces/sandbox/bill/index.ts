@@ -1,6 +1,4 @@
-import { MeshData, Types } from '@hotmeshio/hotmesh';
-
-import { BaseEntity } from '../../base';
+import { MeshOS, Types } from '@hotmeshio/hotmesh';
 
 import { schema as BillSchema } from './schema';
 import * as workflows from './workflows';
@@ -13,7 +11,7 @@ import * as workflows from './workflows';
  * can be interleaved that transactionally update primary state.
  * 
  */
-class Bill extends BaseEntity {
+class Bill extends MeshOS {
 
   getTaskQueue(): string {
     return 'v1';
@@ -47,4 +45,4 @@ class Bill extends BaseEntity {
   }
 }
 
-export { Bill, MeshData };
+export { Bill };

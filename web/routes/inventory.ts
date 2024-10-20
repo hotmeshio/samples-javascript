@@ -1,6 +1,6 @@
+import { MeshOS } from '@hotmeshio/hotmesh';
 import { Router } from 'express';
 
-import { findEntity } from '../../meshdata/manifest';
 import { Inventory } from '../../meshdata/namespaces/inventory';
 
 const router = Router();
@@ -9,7 +9,7 @@ const router = Router();
 router.get('/schema', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     res.json(inventory.getSearchOptions());
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -20,7 +20,7 @@ router.get('/schema', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     res.json(await inventory.add(req.body as Body));
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     res.status(201).send(await inventory.find([], 0, 100));
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -43,7 +43,7 @@ router.get('/:invtId', async (req, res) => {
   try {
     const { invtId } = req.params;
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     res.status(200).send(await inventory.retrieve(invtId));
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -57,7 +57,7 @@ router.patch('/:invtId', async (req, res) => {
   let updatedUser: Record<string, any>;
   try {
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     updatedUser = await inventory.update(invtId, req.body);
   } catch (err) {
     return res.status(500).send({ error: err.message });
@@ -71,7 +71,7 @@ router.delete('/:invtId', async (req, res) => {
   try {
     const { invtId } = req.params;
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     await inventory.delete(invtId);
     res.json({ status: 'success' });
   } catch (err) {
@@ -83,7 +83,7 @@ router.delete('/:invtId', async (req, res) => {
 router.post('/aggregate', async (req, res) => {
   try {
     const query = req.query as {database: string, namespace: string};
-    const inventory = findEntity(query.database, query.namespace, 'inventory') as Inventory;
+    const inventory = MeshOS.findEntity(query.database, query.namespace, 'inventory') as Inventory;
     res.json(await inventory.aggregate(req.body.filter, req.body.apply, req.body.rows, req.body.columns, req.body.reduce, req.body.sort, req.body.start, req.body.size));
   } catch (err) {
     res.status(500).send({ error: err.message });

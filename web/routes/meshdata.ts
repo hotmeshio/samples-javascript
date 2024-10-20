@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { Types } from '@hotmeshio/hotmesh';
 
-import { findEntity, findSchemas, toJSON } from '../../meshdata/manifest';
+import { MeshOS } from '@hotmeshio/hotmesh';
 import { GPT } from '../../modules/gpt';
 
+const { findEntity, findSchemas, toJSON } = MeshOS;
 const router = Router();
 
 /**

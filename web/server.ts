@@ -8,7 +8,6 @@ import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
 
 import { setupTelemetry, shutdownTelemetry } from '../modules/tracer';
-import { init as initMeshData } from '../meshdata/manifest';
 import { router as billRouter } from './routes/bill';
 import { router as userRouter } from './routes/user';
 import { router as orderBillingRouter } from './routes/order_billing';
@@ -20,6 +19,7 @@ import { CustomRequest } from '../types/http';
 import { Socket } from './utils/socket';
 import { startMyCron } from '../cron';
 import { configureLogger } from './utils/logger';
+import { initializeHotMesh } from './utils/meshdata';
 
 const app = express();
 const logger = configureLogger(app);
@@ -43,7 +43,7 @@ app.use(cors(corsOptions));
 
 async function initialize() {
   setupTelemetry();
-  await initMeshData();
+  await initializeHotMesh();
 
   // Start a custom cron job
   await startMyCron(
@@ -83,19 +83,15 @@ async function initialize() {
   app.use('/api/v1/users', userRouter);
   app.use('/api/v1/meshdata', meshDataRouter); //RPC style API
 
-  // Static React Webapp serving
-  app.use(express.static(path.join(__dirname, '../webapp')));
+  // Static React Webapp
+  app.use(express.static(path.join(__dirname, '../node_modules/@hotmeshio/dashboard/build')));
   app.get('/*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../webapp', 'index.html'));
+      res.sendFile(path.join(__dirname, '../node_modules/@hotmeshio/dashboard/build', 'index.html'));
   });
 
   // Socket.io setup
   io.on('connection', (socket) => {
     console.log('io socket connected');
-
-    // socket.on('updateUser', (data) => {
-    //   io.emit('mesh.planes.control', data);
-    // });
 
     socket.on('disconnect', () => {
       console.log('io socket disconnected');
@@ -107,7 +103,6 @@ async function initialize() {
   httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-// Call initialize function
 initialize().catch(error => {
   console.error('Failed to initialize the application:', error);
   process.exit(1);
@@ -126,7 +121,7 @@ process.on('SIGINT', async function onSigint() {
   await shutdown();
 });
 
-// Quit properly on docker stop
+// Quit on docker stop
 process.on('SIGTERM', async function onSigterm() {
   console.log('Got SIGTERM (docker container stop). Graceful shutdown', { loggedAt: new Date().toISOString() });
   await shutdown();

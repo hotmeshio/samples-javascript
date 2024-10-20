@@ -1,11 +1,9 @@
-import { Types } from '@hotmeshio/hotmesh';
-
-import { BaseEntity } from '../../base';
+import { MeshOS, Types } from '@hotmeshio/hotmesh';
 
 import { schema as BillingOrderSchema } from './schema';
 import { safeData } from '../../../../modules/utils';
 
-class Order extends BaseEntity {
+class Order extends MeshOS {
 
   getTaskQueue(): string {
     return 'v2';

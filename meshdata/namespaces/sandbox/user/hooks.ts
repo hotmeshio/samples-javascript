@@ -11,7 +11,13 @@ export const bill = async(planId: string, plan: string, cycle: string) => {
   //persist the indexed, searchable billing plan details
   const userId = MeshData.workflow.getContext().workflowId;
   const search = await MeshData.workflow.search();
-  await search.set('userId', userId, 'planId', planId, 'plan', plan, 'cycle', cycle, 'version', 'v1');
+  await search.set({
+    userId,
+    planId,
+    plan, 
+    cycle, 
+    version: 'v1',
+  });
   let currentPlanId = await search.get('planId');
   let isActive = currentPlanId === planId;
 
